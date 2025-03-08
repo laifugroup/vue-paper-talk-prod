@@ -3,9 +3,10 @@ import { ref } from 'vue'
 import { jsPDF } from 'jspdf'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansCN-Regular.ttf'
 
-const title = ref('')
-const subtitle = ref('')
-const content = ref('')
+const title = ref('纸上谈兵委员会')
+const count = ref('纸上谈兵(2025)第001号')
+const subtitle = ref('关于纸上谈兵挑战赛的通知')
+const content = ref('张三：恭喜你通过了纸上谈兵挑战赛！')
 
 const handleSubmit = async () => {
   const doc = new jsPDF({
@@ -22,21 +23,30 @@ const handleSubmit = async () => {
   doc.setFont('SourceHanSansCN', 'normal')
   doc.setLanguage('zh-CN')
   
-  // 设置字体大小和位置
-  doc.setFontSize(24)
-  const titleWidth = doc.getStringUnitWidth(title.value) * doc.getFontSize()
   const pageWidth = doc.internal.pageSize.getWidth()
-  const titleX = (pageWidth - titleWidth) / 2
-  doc.text(title.value, titleX, 50, { align: 'center' })
   
-  doc.setFontSize(16)
-  const subtitleWidth = doc.getStringUnitWidth(subtitle.value) * doc.getFontSize()
-  const subtitleX = (pageWidth - subtitleWidth) / 2
-  doc.text(subtitle.value, subtitleX, 80, { align: 'center' })
+  // 设置字体大小和位置
+  doc.setFontSize(36)
+  doc.setTextColor(255, 0, 0) // 设置红色
+  doc.text(title.value, pageWidth / 2, 50, { align: 'center' })
   
+  doc.setFontSize(14)
+  doc.setTextColor(0, 0, 0) // 恢复黑色
+  doc.text(count.value, pageWidth / 2, 81, { align: 'center' })
+  //2条红色横线
+  doc.setDrawColor(255, 0, 0) // 设置线条颜色为红色
+  doc.line(40, 90, pageWidth - 40, 90) // 第一条横线
+  doc.line(40, 95, pageWidth - 40, 95) // 第二条横线
+
+  doc.setFontSize(24)
+  doc.setTextColor(255, 0, 0) // 设置红色
+  const subtitleX = pageWidth  / 2
+  doc.text(subtitle.value, subtitleX, 128, { align: 'center' })
+  
+  doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(12)
   const contentLines = doc.splitTextToSize(content.value, pageWidth - 80)
-  doc.text(contentLines, 40, 120)
+  doc.text(contentLines, 40, 170)
   
   // 设置文件名并生成PDF
   const fileName = '纸上谈兵'
@@ -178,12 +188,18 @@ const handleSubmit = async () => {
 .input-field {
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid #000000;
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s;
+  text-align: left;
 }
 
+.input-group:first-child .input-field {
+  color: #000000 !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+}
 .input-field:focus {
   border-color: #409eff;
   outline: none;
