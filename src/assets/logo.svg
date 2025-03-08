@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="paperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#41b883;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#41b883;stop-opacity:0.1"/>
+    </linearGradient>
+  </defs>
+  <!-- 纸张背景 -->
+  <rect x="40" y="40" width="120" height="120" fill="url(#paperGradient)" rx="5" ry="5"/>
+  <!-- 纸张装饰线 -->
+  <line x1="60" y1="70" x2="140" y2="70" stroke="#41b883" stroke-width="2" opacity="0.3"/>
+  <line x1="60" y1="90" x2="140" y2="90" stroke="#41b883" stroke-width="2" opacity="0.3"/>
+  <line x1="60" y1="110" x2="140" y2="110" stroke="#41b883" stroke-width="2" opacity="0.3"/>
+  <!-- 交叉的长剑 -->
+  <g fill="#41b883" transform="rotate(90, 100, 100)">
+    <!-- 第一把剑 -->
+    <g transform="rotate(135, 100, 100)">
+      <!-- 剑身 -->
+      <rect x="70" y="98" width="60" height="4" rx="1"/>
+      <!-- 剑尖 -->
+      <path d="M130 98 L140 100 L130 102 Z"/>
+      <!-- 剑柄 -->
+      <rect x="60" y="97" width="10" height="6" rx="1"/>
+      <rect x="55" y="96" width="5" height="8" rx="1"/>
+    </g>
+    <!-- 第二把剑 -->
+    <g transform="rotate(225, 100, 100)">
+      <!-- 剑身 -->
+      <rect x="70" y="98" width="60" height="4" rx="1"/>
+      <!-- 剑尖 -->
+      <path d="M130 98 L140 100 L130 102 Z"/>
+      <!-- 剑柄 -->
+      <rect x="60" y="97" width="10" height="6" rx="1"/>
+      <rect x="55" y="96" width="5" height="8" rx="1"/>
+    </g>
+  </g>
+</svg>
