@@ -5,7 +5,7 @@
 
 ## 项目效果
 
-![项目截图](./images/paper.png)
+![项目截图](/images/paper.png)
 
 ## 项目说明
 - 项目基于Vue 3和Vite开发，使用了Vue 3的Composition API和TypeScript。
