@@ -1,9 +1,8 @@
 <script setup>
-import { ref, createApp } from 'vue'
+import { ref, createApp, onMounted } from 'vue'
 import { jsPDF } from 'jspdf'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansCN-Regular.ttf'
 import Seal from './Seal.vue'
-import sealImage from '@/assets/images/seal.png'
 import html2canvas from 'html2canvas'
 
 
@@ -19,29 +18,6 @@ const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
 
 
-// 计算五角星的顶点坐标
-const calculateStarPoints = (centerX, centerY, outerRadius) => {
-  const points = []
-  const innerRadius = outerRadius * 0.382 // 内圆半径，使用黄金分割比例
-  
-  for (let i = 0; i < 5; i++) {
-    // 外圆顶点
-    const outerAngle = (i * 72) * Math.PI / 180 // 从正上方开始，每72度一个顶点
-    points.push([
-      centerX + outerRadius * Math.sin(outerAngle),
-      centerY - outerRadius * Math.cos(outerAngle)
-    ])
-    
-    // 内圆顶点
-    const innerAngle = (i * 72 + 36) * Math.PI / 180
-    points.push([
-      centerX + innerRadius * Math.sin(innerAngle),
-      centerY - innerRadius * Math.cos(innerAngle)
-    ])
-  }
-  
-  return points.map(point => point.join(",")).join(" ")
-}
 
 const handleSubmit = async () => {
   const doc = new jsPDF({
@@ -120,6 +96,14 @@ const handleSubmit = async () => {
   const pdfDataUri = doc.output('datauristring',{filename:`${fileName}.pdf`})
   document.getElementById('pdf-preview').src = pdfDataUri + '#filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75' 
 }
+
+
+onMounted(() => {
+  handleSubmit()
+})
+
+
+
 </script>
 
 <template>
@@ -390,3 +374,4 @@ const handleSubmit = async () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>
+
