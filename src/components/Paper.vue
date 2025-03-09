@@ -12,7 +12,7 @@ const count = ref('纸上谈兵(2025)第001号')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
 const content = ref('尊敬的各位评委、亲爱的朋友们：\n\n大家好！今天能够站在这里，获得这个荣誉，我感到无比荣幸和感激。首先，我要感谢主办方和评委们对我的认可，这对我来说是莫大的鼓励。')
 
-
+const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
@@ -20,14 +20,16 @@ const inputBottomCode = ref('51000020161224')
 
 
 const handleSubmit = async () => {
-  const doc = new jsPDF({
-    unit: 'pt',
-    hotfixes: ['px_scaling'],
-    orientation: 'p',
-    format: 'a4',
-    putOnlyUsedFonts: true,
-    compress: true
-  })
+  isLoading.value = true
+  try {
+    const doc = new jsPDF({
+      unit: 'pt',
+      hotfixes: ['px_scaling'],
+      orientation: 'p',
+      format: 'a4',
+      putOnlyUsedFonts: true,
+      compress: true
+    })
   
   // 使用本地思源黑体
   doc.addFont(SourceHanSansCN, 'SourceHanSansCN', 'normal')
@@ -94,7 +96,12 @@ const handleSubmit = async () => {
   
   // 生成PDF数据URI
   const pdfDataUri = doc.output('datauristring',{filename:`${fileName}.pdf`})
-  document.getElementById('pdf-preview').src = pdfDataUri + '#filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75' 
+  document.getElementById('pdf-preview').src = pdfDataUri + '#filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75'
+  } catch (error) {
+    console.error('PDF生成失败:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 
@@ -141,13 +148,19 @@ onMounted(() => {
           ></textarea>
         </div>
         
-        <button @click="handleSubmit" class="submit-btn">生成预览</button>
+        <button @click="handleSubmit" class="submit-btn" :disabled="isLoading">
+          {{ isLoading ? '生成中...' : '生成预览' }}
+        </button>
       </div>
     </div>
     
     <div class="divider">
     </div>
     <div class="center-panel">
+      <div v-if="isLoading" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在生成PDF...</div>
+      </div>
       <iframe id="pdf-preview" class="pdf-preview"></iframe>
     </div>
     <div class="divider">
@@ -372,6 +385,44 @@ onMounted(() => {
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #ff0000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
 }
 </style>
 
