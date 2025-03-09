@@ -1,17 +1,16 @@
-# 纸上谈兵 荣耀版
+# 纸上谈兵(荣耀)
 
-This template should help get you started developing with Vue 3 in Vite.
+## 项目介绍
+一个基于Vue 3和Vite开发的纸上谈兵项目。
 
-## Recommended IDE Setup
+## 项目效果
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+![项目截图](./images/paper.png)
 
-## Customize configuration
+## 项目说明
+- 项目基于Vue 3和Vite开发，使用了Vue 3的Composition API和TypeScript。
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+## 项目运行
 ```sh
 pnpm install
 ```

@@ -210,7 +210,7 @@ onMounted(() => {
 
 .center-panel {
   flex: 2;
-  padding: 0rem;
+  padding: 0.5rem;
   position: relative;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
