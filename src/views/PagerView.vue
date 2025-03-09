@@ -1,10 +1,13 @@
 <script setup>
 import Paper from '../components/Paper.vue'
+import Seal from '../components/Seal.vue'
+
 </script>
 
 <template>
   <div class="pager-container">
     <div class="paper-section">
+      <!-- <Seal/> -->
       <Paper />
     </div>
   </div>
