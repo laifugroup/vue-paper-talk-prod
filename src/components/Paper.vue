@@ -333,13 +333,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 1rem;
+  gap: 1rem;
+  padding: 0.5rem;
 }
 
 .top-panel {
   background-color: #ffffff;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
