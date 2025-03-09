@@ -10,7 +10,7 @@ import html2canvas from 'html2canvas'
 const title = ref('纸上谈兵委员会')
 const count = ref('纸上谈兵(2025)第001号')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('尊敬的各位评委、亲爱的朋友们：\n\n大家好！今天能够站在这里，获得这个荣誉，我感到无比荣幸和感激。首先，我要感谢主办方和评委们对我的认可，这对我来说是莫大的鼓励。')
+const content = ref('张三:\n\n恭喜您在2025-2026年`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！你们的智慧与才华为我们呈现了一场精彩绝伦的兵法盛宴，充分展现了中华传统文化的深厚底蕴与现代创新的完美结合。\n\n再次向所有获奖者表示衷心的祝贺！愿你们在未来的征程中继续披荆斩棘，勇攀高峰！')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
