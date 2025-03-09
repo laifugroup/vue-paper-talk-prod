@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansCN-Regular.ttf'
 import Seal from './Seal.vue'
 import sealImage from '@/assets/images/seal.png'
+import html2canvas from 'html2canvas'
 
 
 
@@ -81,9 +82,6 @@ const handleSubmit = async () => {
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(14)
   const contentLines = doc.splitTextToSize(content.value, pageWidth-80)
-  console.log(contentLines)
-  console.log("----")
-  console.log(content.value)
   
   // 保留空格字符
   doc.setCharSpace(0)
@@ -97,11 +95,18 @@ const handleSubmit = async () => {
   // 添加文字
   doc.text(`纸上谈兵委员会\n${formattedDate}`, pageWidth - 180, pageHeight - 120, { align: 'center', lineHeightFactor: 1.4 })
 
+  // 获取印章元素并转换为图片
+  const sealElement = document.querySelector('.seal-container')
+  if (sealElement) {
+    const canvas = await html2canvas(sealElement, {
+      backgroundColor: null,
+      scale: 2,
+      logging: false
+    })
+    const sealDataUrl = canvas.toDataURL('image/png')
+    doc.addImage(sealDataUrl, 'PNG', pageWidth - 280, pageHeight - 220, 200, 200)
+  }
 
-
-  // ...
-
-  doc.addImage(sealImage, 'PNG', pageWidth - 280, pageHeight - 220, 200, 200)
   // 设置文件名并生成PDF
   const fileName = '纸上谈兵'
   doc.setProperties({
@@ -113,8 +118,6 @@ const handleSubmit = async () => {
   
   // 生成PDF数据URI
   const pdfDataUri = doc.output('datauristring',{filename:`${fileName}.pdf`})
-    // 添加文件名和缩放参数并设置预览 #filename=' + encodeURIComponent(`${fileName}.pdf`) + 
-  console.log(pdfDataUri + '?filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75')
   document.getElementById('pdf-preview').src = pdfDataUri + '#filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75' 
 }
 </script>
