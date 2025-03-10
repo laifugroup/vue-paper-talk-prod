@@ -12,6 +12,7 @@ const count = ref('')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
 const content = ref('不吃香菜(努力版)：\n\n    恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 
+const douyinId = ref('')
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
@@ -186,7 +187,9 @@ const handlePrint = () => {
   }
 }
 
-
+const saveDouyinId = () => {
+  localStorage.setItem('douyinId', douyinId.value)
+}
 
 </script>
 
@@ -199,6 +202,15 @@ const handlePrint = () => {
       </div>
       
       <div class="form-section">
+        <div class="douyin-group">
+          <div class="input-field">
+            <label for="douyinId">抖音直播ID：</label>
+            <input id="douyinId" v-model="douyinId" placeholder="请输入抖音直播ID" />
+          </div>
+          <button class="save-btn" @click="handleSubmit" :disabled="isLoading">
+            {{ isLoading ? '生成中...' : '保存' }}
+          </button>
+        </div>
         <div class="input-group">
           <input
             v-model="title"
@@ -535,6 +547,41 @@ const handlePrint = () => {
   background-color: #cccccc;
   cursor: not-allowed;
 }
+
+
+
+.douyin-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.douyin-group .input-field {
+  flex: 1;
+}
+
+.save-btn {
+  padding: 1rem 2rem;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  white-space: nowrap;
+}
+
+.save-btn:hover {
+  background-color: #ff6666;
+}
+
+.submit-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
 </style>
+
+
 
 
