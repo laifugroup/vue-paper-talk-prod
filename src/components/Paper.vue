@@ -4,8 +4,7 @@ import { jsPDF } from 'jspdf'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansCN-Regular.ttf'
 import Seal from './Seal.vue'
 import html2canvas from 'html2canvas'
-
-
+import VuePdfEmbed from 'vue-pdf-embed'
 
 const title = ref('纸上谈兵委员会')
 const count = ref('')
@@ -16,6 +15,7 @@ const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
+const pdfUrl = ref('')
 
 // 获取当前编号
 const getCurrentNumber = () => {
@@ -124,21 +124,22 @@ const genPdf = async () => {
     keywords: '纸上谈兵,赵括,佛洛里*达州',
   })
   
-  // 生成PDF数据URI
+  // 生成PDF并自动下载
   const pdfBlob = doc.output('blob')
-  const pdfUrl = URL.createObjectURL(pdfBlob)
-  // 将 Blob 转换为 File 对象
-//const pdfFile = new File([pdfBlob], 'my-custom-filename.pdf', { type: 'application/pdf' });
-  console.log(pdfUrl)
-  const iframe = document.getElementById('pdf-preview')
-  iframe.src=pdfUrl
+  const downloadLink = document.createElement('a')
+  downloadLink.href = URL.createObjectURL(pdfBlob)
+  downloadLink.download = `${title.value}-${count.value}.pdf`
+  document.body.appendChild(downloadLink)
+  downloadLink.click()
+  document.body.removeChild(downloadLink)
+  URL.revokeObjectURL(downloadLink.href)
+  pdfUrl.value = URL.createObjectURL(pdfBlob)
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
     isLoading.value = false
   }
 }
-
 
 onMounted(() => {
   const currentNumber = getCurrentNumber()
@@ -150,6 +151,30 @@ onMounted(() => {
   }
   genPdf()
 })
+
+
+const handleDownload = () => {
+  if (pdfUrl.value) {
+    const downloadLink = document.createElement('a')
+    downloadLink.href = pdfUrl.value
+    downloadLink.download = `${title.value}-${count.value}.pdf`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
+  }
+}
+
+const handlePrint = () => {
+  if (pdfUrl.value) {
+    const printWindow = window.open(pdfUrl.value, '_blank')
+    printWindow.onload = () => {
+      printWindow.print()
+      // setTimeout(() => {
+      //   printWindow.close()
+      // }, 1000)
+    }
+  }
+}
 
 
 
@@ -199,11 +224,21 @@ onMounted(() => {
     <div class="divider">
     </div>
     <div class="center-panel">
+      <div class="action-buttons">
+        <button class="icon-button" @click="handleDownload" title="下载PDF">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </button>
+        <button class="icon-button" @click="handlePrint" title="打印PDF">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
+      </div>
       <div v-if="isLoading" class="loading-overlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">正在生成PDF...</div>
       </div>
-      <iframe id="pdf-preview" class="pdf-preview"></iframe>
+      <div class="pdf-preview">
+        <VuePdfEmbed v-if="pdfUrl" :source="pdfUrl" :zoom="0.75" />
+      </div>
     </div>
     <div class="divider">
     </div>
@@ -252,11 +287,35 @@ onMounted(() => {
 
 .center-panel {
   flex: 2;
-  padding: 0rem;
+  padding: 0.2rem 0;
   position: relative;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
 }
 
+.action-buttons {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.icon-button {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 0.2rem;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.icon-button:hover {
+  background-color: #f5f5f5;
+  color: #ff0000;
+  border-color: #ff0000;
+}
 .divider {
   display: flex;
   align-items: center;
@@ -366,10 +425,10 @@ onMounted(() => {
 .pdf-preview {
   width: 100%;
   height: 100%;
-  border: none;
   background-color: white;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
+
 .seal-view-container {
   width: 100%;
   height: 100%;
@@ -467,4 +526,5 @@ onMounted(() => {
   cursor: not-allowed;
 }
 </style>
+
 
