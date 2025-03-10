@@ -8,18 +8,41 @@ import html2canvas from 'html2canvas'
 
 
 const title = ref('纸上谈兵委员会')
-const count = ref('纸上谈兵(2025)第001号')
+const count = ref('')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('尊敬的各位评委、亲爱的朋友们：\n\n大家好！今天能够站在这里，获得这个荣誉，我感到无比荣幸和感激。首先，我要感谢主办方和评委们对我的认可，这对我来说是莫大的鼓励。')
+const content = ref('不吃香菜(努力版)：\n\n恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
 
+// 获取当前编号
+const getCurrentNumber = () => {
+  const currentNumber = localStorage.getItem('paperNumber')
+  return currentNumber ? parseInt(currentNumber) : 0
+}
 
+// 更新编号
+const updateNumber = (number) => {
+  localStorage.setItem('paperNumber', number.toString())
+}
+
+// 格式化编号为三位数
+const formatNumber = (number) => {
+  return number.toString().padStart(3, '0')
+}
+
+// 生成文档编号
+const generateDocumentNumber = () => {
+  const currentYear = new Date().getFullYear()
+  const nextNumber = getCurrentNumber() + 1
+  updateNumber(nextNumber)
+  count.value = `纸上谈兵(${currentYear})第${formatNumber(nextNumber)}号`
+}
 
 const handleSubmit = async () => {
+  generateDocumentNumber()
   isLoading.value = true
   try {
     const doc = new jsPDF({
@@ -106,6 +129,11 @@ const handleSubmit = async () => {
 
 
 onMounted(() => {
+  const currentNumber = getCurrentNumber()
+  if (currentNumber > 0) {
+    const currentYear = new Date().getFullYear()
+    count.value = `纸上谈兵(${currentYear})第${formatNumber(currentNumber)}号`
+  }
   handleSubmit()
 })
 
