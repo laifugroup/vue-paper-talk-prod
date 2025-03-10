@@ -136,13 +136,6 @@ const genPdf = async () => {
   
   // 生成PDF并自动下载
   const pdfBlob = doc.output('blob')
-  // const downloadLink = document.createElement('a')
-  // downloadLink.href = URL.createObjectURL(pdfBlob)
-  // downloadLink.download = `${title.value}-${count.value}.pdf`
-  // document.body.appendChild(downloadLink)
-  // downloadLink.click()
-  // document.body.removeChild(downloadLink)
-  // URL.revokeObjectURL(downloadLink.href)
   pdfUrl.value = URL.createObjectURL(pdfBlob)
   doc.save(`${title.value}-${count.value}.pdf`)
   } catch (error) {
@@ -159,6 +152,11 @@ onMounted(() => {
     const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
     count.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
     console.log( count.value )
+  }
+  // 从localStorage中读取抖音直播ID
+  const savedDouyinId = localStorage.getItem('douyinId')
+  if (savedDouyinId) {
+    douyinId.value = savedDouyinId
   }
   genPdf()
 })
@@ -180,15 +178,13 @@ const handlePrint = () => {
     const printWindow = window.open(pdfUrl.value, '_blank')
     printWindow.onload = () => {
       printWindow.print()
-      // setTimeout(() => {
-      //   printWindow.close()
-      // }, 1000)
     }
   }
 }
 
 const saveDouyinId = () => {
   localStorage.setItem('douyinId', douyinId.value)
+  //handleSubmit()
 }
 
 </script>
@@ -207,8 +203,8 @@ const saveDouyinId = () => {
             <label for="douyinId">抖音直播ID：</label>
             <input id="douyinId" v-model="douyinId" placeholder="请输入抖音直播ID" />
           </div>
-          <button class="save-btn" @click="handleSubmit" :disabled="isLoading">
-            {{ isLoading ? '生成中...' : '保存' }}
+          <button class="save-douyin-id-btn" @click="saveDouyinId" >
+            {{  '保存' }}
           </button>
         </div>
         <div class="input-group">
@@ -297,13 +293,14 @@ const saveDouyinId = () => {
   display: flex;
   height: 100vh;
   background-color: #f5f5f5;
+  border: none;
 }
 
 .left-panel {
   flex: 2;
   padding: 2rem;
   background-color: white;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
   position: relative;
 }
 
@@ -311,7 +308,7 @@ const saveDouyinId = () => {
   flex: 2;
   padding: 0.2rem 0;
   position: relative;
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .action-buttons {
@@ -405,17 +402,17 @@ const saveDouyinId = () => {
 
 .input-field {
   width: 100%;
-  padding: 1rem;
+  padding: 0.6rem;
   border: 1px solid #000000;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: border-color 0.3s;
   text-align: left;
 }
 
 .input-group:first-child .input-field {
   color: #000000 !important;
-  font-size: 1.5rem !important;
+  font-size: 1.2rem !important;
   font-weight: bold !important;
 }
 
@@ -425,7 +422,7 @@ const saveDouyinId = () => {
 }
 
 .content-area {
-  min-height: 300px;
+  min-height: 200px;
   resize: vertical;
 }
 
@@ -558,10 +555,18 @@ const saveDouyinId = () => {
 
 .douyin-group .input-field {
   flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
-.save-btn {
-  padding: 1rem 2rem;
+.douyin-group .input-field input {
+  height: 100%;
+  padding: 0.4rem 0.6rem;
+}
+
+.save-douyin-id-btn {
+  padding: 0.4rem 0.6rem;
   background-color: #ff0000;
   color: white;
   border: none;
