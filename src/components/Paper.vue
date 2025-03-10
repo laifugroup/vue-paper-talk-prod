@@ -35,23 +35,29 @@ const formatNumber = (number) => {
 
 // 生成文档编号
 const generateDocumentNumber = () => {
-  const currentYear = new Date().getFullYear()
+  const currentDate=new Date()
+  const currentYear = currentDate.getFullYear()
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
-  count.value = `纸上谈兵(${currentYear})第${formatNumber(nextNumber)}号`
+ const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
+  count.value = `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
 }
 
 const handleSubmit = async () => {
   generateDocumentNumber()
+  genPdf()
+}
+
+const genPdf = async () => {
   isLoading.value = true
   try {
     const doc = new jsPDF({
       unit: 'pt',
-      hotfixes: ['px_scaling'],
+      hotfixes: ['pt_scaling'],
       orientation: 'p',
       format: 'a4',
-      putOnlyUsedFonts: true,
-      compress: true
+      putOnlyUsedFonts: false,
+      compress: false
     })
   
   // 使用本地思源黑体
@@ -61,6 +67,8 @@ const handleSubmit = async () => {
   
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
+  // 保留空格字符，使用Unicode空格
+  doc.text(`aaaa\u3000\u3000vvv`, pageWidth / 2, 20, { align: 'center', renderingMode: 'fill', charSpace: 0, preserveLeadingSpaces: true, lineHeightFactor: 1.2, maxWidth: pageWidth-80 })
   
   // 设置字体大小和位置
   doc.setFontSize(36)
@@ -84,8 +92,7 @@ const handleSubmit = async () => {
   doc.setFontSize(14)
   const contentLines = doc.splitTextToSize(content.value, pageWidth-80)
   
-  // 保留空格字符
-  doc.setCharSpace(0)
+
   doc.text(contentLines, 40, 170, { align: 'left', renderingMode: 'fill', charSpace: 0, preserveLeadingSpaces: true, lineHeightFactor: 1.2, maxWidth: pageWidth-80 })
 
   // 添加右下角文字和日期
@@ -118,8 +125,10 @@ const handleSubmit = async () => {
   })
   
   // 生成PDF数据URI
-  const pdfDataUri = doc.output('datauristring',{filename:`${fileName}.pdf`})
-  document.getElementById('pdf-preview').src = pdfDataUri + '#filename=' + encodeURIComponent(`${fileName}.pdf`) + '&zoom=75'
+  const pdfDataUri = doc.output('datauristring',{filename:`aaa.pdf`})
+  const iframe = document.getElementById('pdf-preview')
+  iframe.src = pdfDataUri + '#zoom=75'
+  iframe.title = 'aaa.pdf' 
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
@@ -131,10 +140,12 @@ const handleSubmit = async () => {
 onMounted(() => {
   const currentNumber = getCurrentNumber()
   if (currentNumber > 0) {
-    const currentYear = new Date().getFullYear()
-    count.value = `纸上谈兵(${currentYear})第${formatNumber(currentNumber)}号`
+    const currentDate=new Date()
+    const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
+    count.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
+    console.log( count.value )
   }
-  handleSubmit()
+  genPdf()
 })
 
 
