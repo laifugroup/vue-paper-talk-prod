@@ -1,5 +1,5 @@
 <script setup>
-import { ref, createApp, onMounted } from 'vue'
+import { ref, createApp, onMounted, onUnmounted } from 'vue'
 import { jsPDF } from 'jspdf'
 //import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Regular.ttf' 字体没有空格
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
@@ -158,8 +158,120 @@ onMounted(() => {
   if (savedDouyinId) {
     douyinId.value = savedDouyinId
   }
-  genPdf()
+  //genPdf()
+  wsConnection = connectDou()
 })
+
+onUnmounted(() => {
+  if (wsConnection) {
+    wsConnection.close()
+  }
+})
+
+
+const connectDou = () => {
+  const url = `ws://127.0.0.1:8888`
+  const ws = new WebSocket(url)
+
+  ws.onopen = () => {
+    console.log('WebSocket连接已建立')
+  }
+
+  /**
+   * 
+   *  public enum PackMsgType
+    {
+        [Description("无")]
+        无 = 0,       
+        [Description("消息")] 
+        弹幕消息 = 1,
+        [Description("点赞")]
+        点赞消息 = 2,
+        [Description("进房")]
+        进直播间 = 3,
+        [Description("关注")]
+        关注消息 = 4,
+        [Description("礼物")]
+        礼物消息 = 5,
+        [Description("统计")]
+        直播间统计 = 6,
+        [Description("粉团")]
+        粉丝团消息 = 7,
+        [Description("分享")]
+        直播间分享 = 8,
+        [Description("下播")]
+        下播 = 9
+    }
+   */
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      switch (data.Type) {
+        case 0: // 无
+          console.log('收到空消息')
+          break
+        case 1: // 弹幕消息
+          const chatData = JSON.parse(data.Data)
+          const chatUser = chatData.User
+          console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
+          break
+        case 2: // 点赞消息
+          const likeData = JSON.parse(data.Data)
+          const likeUser = likeData.User
+          console.log(`用户 ${likeUser.Nickname} 点赞了直播间，点赞数：${likeData.LikeCount}`)
+          break
+        case 3: // 进直播间
+          const enterData = JSON.parse(data.Data)
+          const enterUser = enterData.User
+          
+          console.log(`用户 ${enterUser.Nickname}${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
+          break
+        case 4: // 关注消息
+          const followData = JSON.parse(data.Data)
+          const followUser = followData.User
+          console.log(`用户 ${followUser.Nickname} 关注了主播`)
+          break
+        case 5: // 礼物消息
+          const giftData = JSON.parse(data.Data)
+          const giftUser = giftData.User
+          console.log(`用户 ${giftUser.Nickname} 赠送礼物：${giftData.Content}`)
+          break
+        case 6: // 直播间统计
+          const statsData = JSON.parse(data.Data)
+          //console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
+          console.log(`直播间统计数据：${statsData.Content}`)
+          break
+        case 7: // 粉丝团消息
+          const fansData = JSON.parse(data.Data)
+          console.log(`粉丝团消息：${JSON.stringify(fansData)}`)
+          break
+        case 8: // 直播间分享
+          const shareData = JSON.parse(data.Data)
+          console.log(`用户分享了直播间：${shareData.Content}`)
+          break
+        case 9: // 下播
+          console.log('主播已下播')
+          break
+        default:
+          console.log('未知消息类型:', data)
+      }
+    } catch (error) {
+      console.error('消息解析失败:', error)
+    }
+  }
+
+  ws.onerror = (error) => {
+    console.error('WebSocket错误:', error)
+  }
+
+  ws.onclose = () => {
+    console.log('WebSocket连接已关闭')
+  }
+
+  return ws
+}
+
+let wsConnection = null
 
 
 const handleDownload = () => {
