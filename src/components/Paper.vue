@@ -1,7 +1,8 @@
 <script setup>
 import { ref, createApp, onMounted } from 'vue'
 import { jsPDF } from 'jspdf'
-import SourceHanSansCN from '@/assets/fonts/SourceHanSansCN-Regular.ttf'
+//import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Regular.ttf' 字体没有空格
+import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
 import Seal from './Seal.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
@@ -9,7 +10,7 @@ import VuePdfEmbed from 'vue-pdf-embed'
 const title = ref('纸上谈兵委员会')
 const count = ref('')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('不吃香菜(努力版)：\n\n恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const content = ref('不吃香菜(努力版)：\n    恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
@@ -67,9 +68,6 @@ const genPdf = async () => {
   
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
-  // 保留空格字符，使用Unicode空格
-  doc.text(`aaaa\u3000\u3000vvv`, pageWidth / 2, 20, { align: 'center', renderingMode: 'fill', charSpace: 0, preserveLeadingSpaces: true, lineHeightFactor: 1.2, maxWidth: pageWidth-80 })
-  
   // 设置字体大小和位置
   doc.setFontSize(36)
   doc.setTextColor(255, 0, 0) // 设置红色
@@ -89,11 +87,22 @@ const genPdf = async () => {
   doc.text(subtitle.value, subtitleX, 128, { align: 'center' })
   
   doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.setFontSize(14)
+  doc.setFontSize(16)
   const contentLines = doc.splitTextToSize(content.value, pageWidth-80)
   
 
-  doc.text(contentLines, 40, 170, { align: 'left', renderingMode: 'fill', charSpace: 0, preserveLeadingSpaces: true, lineHeightFactor: 1.2, maxWidth: pageWidth-80 })
+  doc.text(contentLines, 40, 170, { 
+    align: 'left', 
+    renderingMode: 'fill', 
+    charSpace: 1.5,  // 增加字符间距
+    preserveLeadingSpaces: true, 
+    lineHeightFactor: 1.5, 
+    maxWidth: pageWidth-80,
+    flags: {
+      noBOM: true,
+      autoencode: true
+    }
+  })
 
   // 添加右下角文字和日期
   const currentDate = new Date()
@@ -126,14 +135,15 @@ const genPdf = async () => {
   
   // 生成PDF并自动下载
   const pdfBlob = doc.output('blob')
-  const downloadLink = document.createElement('a')
-  downloadLink.href = URL.createObjectURL(pdfBlob)
-  downloadLink.download = `${title.value}-${count.value}.pdf`
-  document.body.appendChild(downloadLink)
-  downloadLink.click()
-  document.body.removeChild(downloadLink)
-  URL.revokeObjectURL(downloadLink.href)
+  // const downloadLink = document.createElement('a')
+  // downloadLink.href = URL.createObjectURL(pdfBlob)
+  // downloadLink.download = `${title.value}-${count.value}.pdf`
+  // document.body.appendChild(downloadLink)
+  // downloadLink.click()
+  // document.body.removeChild(downloadLink)
+  // URL.revokeObjectURL(downloadLink.href)
   pdfUrl.value = URL.createObjectURL(pdfBlob)
+  doc.save(`${title.value}-${count.value}.pdf`)
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
