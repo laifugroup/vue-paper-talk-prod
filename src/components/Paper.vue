@@ -6,14 +6,11 @@ import Seal from './Seal.vue'
 import html2canvas from 'html2canvas'
 
 
-const currentDate = new Date()
-
-const times = ref(0)
 
 const title = ref('纸上谈兵委员会')
-const count = ref(`纸上谈兵(${currentDate.getFullYear()})第${times.value}号`)
+const count = ref('纸上谈兵(2025)第001号')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('不吃香菜(努力版):\n\n恭喜您在2025-2026年`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！你们的智慧与才华为我们呈现了一场精彩绝伦的兵法盛宴，充分展现了中华传统文化的深厚底蕴与现代创新的完美结合。\n\n再次向所有获奖者表示衷心的祝贺！愿你们在未来的征程中继续披荆斩棘，勇攀高峰！')
+const content = ref('尊敬的各位评委、亲爱的朋友们：\n\n大家好！今天能够站在这里，获得这个荣誉，我感到无比荣幸和感激。首先，我要感谢主办方和评委们对我的认可，这对我来说是莫大的鼓励。')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
@@ -25,8 +22,6 @@ const inputBottomCode = ref('51000020161224')
 const handleSubmit = async () => {
   isLoading.value = true
   try {
-    times.value++
-    count.value = `纸上谈兵(${currentDate.getFullYear()})第${times.value}号`
     const doc = new jsPDF({
       unit: 'pt',
       hotfixes: ['px_scaling'],
@@ -71,7 +66,7 @@ const handleSubmit = async () => {
   doc.text(contentLines, 40, 170, { align: 'left', renderingMode: 'fill', charSpace: 0, preserveLeadingSpaces: true, lineHeightFactor: 1.2, maxWidth: pageWidth-80 })
 
   // 添加右下角文字和日期
-  
+  const currentDate = new Date()
   const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(24)
@@ -215,7 +210,7 @@ onMounted(() => {
 
 .center-panel {
   flex: 2;
-  padding: 0.5rem;
+  padding: 0rem;
   position: relative;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 }
@@ -338,13 +333,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 0.5rem;
+  gap: 2rem;
+  padding: 1rem;
 }
 
 .top-panel {
   background-color: #ffffff;
-  padding: 1rem;
+  padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
