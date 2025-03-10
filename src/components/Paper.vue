@@ -56,8 +56,8 @@ const genPdf = async () => {
       hotfixes: ['pt_scaling'],
       orientation: 'p',
       format: 'a4',
-      putOnlyUsedFonts: false,
-      compress: false
+      putOnlyUsedFonts: true,
+      compress: true
     })
   
   // 使用本地思源黑体
@@ -121,14 +121,17 @@ const genPdf = async () => {
     title: fileName,
     subject: subtitle.value,
     author: '纸上谈兵委员会',
-    keywords: '纸上谈兵,赵括,佛洛里*达州'
+    keywords: '纸上谈兵,赵括,佛洛里*达州',
   })
   
   // 生成PDF数据URI
-  const pdfDataUri = doc.output('datauristring',{filename:`aaa.pdf`})
+  const pdfBlob = doc.output('blob')
+  const pdfUrl = URL.createObjectURL(pdfBlob)
+  // 将 Blob 转换为 File 对象
+//const pdfFile = new File([pdfBlob], 'my-custom-filename.pdf', { type: 'application/pdf' });
+  console.log(pdfUrl)
   const iframe = document.getElementById('pdf-preview')
-  iframe.src = pdfDataUri + '#zoom=75'
-  iframe.title = 'aaa.pdf' 
+  iframe.src=pdfUrl
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
