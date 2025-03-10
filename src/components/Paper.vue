@@ -10,7 +10,7 @@ import VuePdfEmbed from 'vue-pdf-embed'
 const title = ref('纸上谈兵委员会')
 const count = ref('')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('不吃香菜(努力版)：\n    恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const content = ref('不吃香菜(努力版)：\n\n    恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
