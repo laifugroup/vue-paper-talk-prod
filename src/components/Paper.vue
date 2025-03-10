@@ -10,9 +10,9 @@ import VuePdfEmbed from 'vue-pdf-embed'
 const title = ref('纸上谈兵委员会')
 const count = ref('')
 const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('不吃香菜(努力版)：\n\n    恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const content = ref('   恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const nickName = ref('不吃香菜(努力版)')
 
-const douyinId = ref('')
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
@@ -47,10 +47,10 @@ const generateDocumentNumber = () => {
 
 const handleSubmit = async () => {
   generateDocumentNumber()
-  genPdf()
+  genPaperTalkPdf(true)
 }
 
-const genPdf = async () => {
+const genPaperTalkPdf = async (autoDownload = false) => {
   isLoading.value = true
   try {
     const doc = new jsPDF({
@@ -89,7 +89,7 @@ const genPdf = async () => {
   
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(16)
-  const contentLines = doc.splitTextToSize(content.value, pageWidth-80)
+  const contentLines = doc.splitTextToSize(`${nickName.value}:\n\n${content.value}`, pageWidth-80)
   
 
   doc.text(contentLines, 40, 170, { 
@@ -131,13 +131,15 @@ const genPdf = async () => {
     title: fileName,
     subject: subtitle.value,
     author: '纸上谈兵委员会',
-    keywords: '纸上谈兵,赵括,佛洛里*达州',
+    keywords: '纸上谈兵,赵括,佛罗里*达州',
   })
   
-  // 生成PDF并自动下载
+  // 生成PDF并根据参数决定是否自动下载
   const pdfBlob = doc.output('blob')
   pdfUrl.value = URL.createObjectURL(pdfBlob)
-  doc.save(`${title.value}-${count.value}.pdf`)
+  if (autoDownload) {
+    doc.save(`${title.value}-${count.value}.pdf`)
+  }
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
@@ -151,14 +153,8 @@ onMounted(() => {
     const currentDate=new Date()
     const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
     count.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
-    console.log( count.value )
   }
-  // 从localStorage中读取抖音直播ID
-  const savedDouyinId = localStorage.getItem('douyinId')
-  if (savedDouyinId) {
-    douyinId.value = savedDouyinId
-  }
-  //genPdf()
+  genPaperTalkPdf(false)
   wsConnection = connectDou()
 })
 
@@ -293,12 +289,6 @@ const handlePrint = () => {
     }
   }
 }
-
-const saveDouyinId = () => {
-  localStorage.setItem('douyinId', douyinId.value)
-  //handleSubmit()
-}
-
 </script>
 
 <template>
@@ -310,15 +300,6 @@ const saveDouyinId = () => {
       </div>
       
       <div class="form-section">
-        <div class="douyin-group">
-          <div class="input-field">
-            <label for="douyinId">抖音直播ID：</label>
-            <input id="douyinId" v-model="douyinId" placeholder="请输入抖音直播ID" />
-          </div>
-          <button class="save-douyin-id-btn" @click="saveDouyinId" >
-            {{  '保存' }}
-          </button>
-        </div>
         <div class="input-group">
           <input
             v-model="title"
@@ -336,12 +317,22 @@ const saveDouyinId = () => {
             class="input-field"
           />
         </div>
+
+        <div class="input-group">
+          <input
+            v-model="nickName"
+            type="text"
+            placeholder="请输入昵称"
+            class="input-field"
+          />
+        </div>
         
         <div class="input-group">
           <textarea
             v-model="content"
-            placeholder="请输入内容"
+            placeholder="请输入内容（最多5行）"
             class="input-field content-area"
+            rows="2"
           ></textarea>
         </div>
         
@@ -375,10 +366,6 @@ const saveDouyinId = () => {
     <div class="right-panel">
       <div class="seal-view-container">
         <div class="top-panel">
-                  <div class="logo-section">
-                    <img src="@/assets/logo.svg" alt="Logo" class="logo" />
-                    <span class="app-name">纸上谈兵*印章</span>
-                  </div>
                   <div class="input-group">
                     <label for="topText">标题：</label>
                     <input id="topText" v-model="inputTopText" />
@@ -461,7 +448,7 @@ const saveDouyinId = () => {
 
 .right-panel {
   flex: 2;
-  padding: 2rem;
+  padding: 1rem;
   background-color: white;
   display: flex;
   flex-direction: column;
@@ -570,7 +557,7 @@ const saveDouyinId = () => {
 }
 
 .top-panel {
-  background-color: #ffffff;
+  background-color: #f3f3f3;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -579,7 +566,6 @@ const saveDouyinId = () => {
 .top-panel h2 {
   color: #333;
   text-align: center;
-  margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
 
@@ -589,7 +575,6 @@ const saveDouyinId = () => {
 
 .top-panel .input-group label {
   display: inline-block;
-  width: 60px;
   color: #666;
   margin-right: 1rem;
 }
@@ -598,7 +583,6 @@ const saveDouyinId = () => {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  width: calc(100% - 80px);
   font-size: 1rem;
 }
 
@@ -613,7 +597,7 @@ const saveDouyinId = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #f3f3f3;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -655,38 +639,6 @@ const saveDouyinId = () => {
 .submit-btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
-}
-
-
-
-.douyin-group {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.douyin-group .input-field {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.douyin-group .input-field input {
-  height: 100%;
-  padding: 0.4rem 0.6rem;
-}
-
-.save-douyin-id-btn {
-  padding: 0.4rem 0.6rem;
-  background-color: #ff0000;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  white-space: nowrap;
 }
 
 .save-btn:hover {
