@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="paperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00FF00;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#00FF00;stop-opacity:0.1"/>
+    </linearGradient>
+    <clipPath id="circleClip">
+      <circle cx="100" cy="100" r="90"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#circleClip)">
+    <!-- 圆形背景 -->
+    <circle cx="100" cy="100" r="90" fill="url(#paperGradient)"/>
+    <!-- 纸张装饰线 -->
+    <line x1="40" y1="60" x2="160" y2="60" stroke="#00FF00" stroke-width="2" opacity="0.3"/>
+    <line x1="40" y1="90" x2="160" y2="90" stroke="#00FF00" stroke-width="2" opacity="0.3"/>
+    <line x1="40" y1="120" x2="160" y2="120" stroke="#00FF00" stroke-width="2" opacity="0.3"/>
+    <!-- 交叉的长剑 -->
+    <g fill="#00FF00" transform="translate(5, -5) scale(0.9)">
+      <g transform="rotate(90, 100, 85)">
+        <!-- 第一把剑 -->
+        <g transform="rotate(135, 100, 85)">
+          <!-- 剑身 -->
+          <rect x="65" y="83" width="70" height="4" rx="1"/>
+          <!-- 剑尖 -->
+          <path d="M135 83 L145 85 L135 87 Z"/>
+          <!-- 剑柄 -->
+          <rect x="55" y="82" width="10" height="6" rx="1"/>
+          <rect x="50" y="81" width="5" height="8" rx="1"/>
+        </g>
+        <!-- 第二把剑 -->
+        <g transform="rotate(225, 100, 85)">
+          <!-- 剑身 -->
+          <rect x="65" y="83" width="70" height="4" rx="1"/>
+          <!-- 剑尖 -->
+          <path d="M135 83 L145 85 L135 87 Z"/>
+          <!-- 剑柄 -->
+          <rect x="55" y="82" width="10" height="6" rx="1"/>
+          <rect x="50" y="81" width="5" height="8" rx="1"/>
+        </g>
+      </g>
+    </g>
+    <!-- 底部文字 -->
+    <text x="100" y="160" text-anchor="middle" fill="#FFFFFF" font-size="18" opacity="0.8" font-family="Arial">纸上谈兵</text>
+  </g>
+</svg>

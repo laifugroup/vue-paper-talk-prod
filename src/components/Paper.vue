@@ -1,5 +1,5 @@
 <script setup>
-import { ref, createApp, onMounted, onUnmounted } from 'vue'
+import { ref, createApp, onMounted, onUnmounted, nextTick } from 'vue'
 import { jsPDF } from 'jspdf'
 //import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Regular.ttf' 字体没有空格
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
@@ -7,11 +7,11 @@ import Seal from './Seal.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
 
-const title = ref('纸上谈兵委员会')
-const count = ref('')
-const subtitle = ref('关于纸上谈兵挑战赛的通知')
-const content = ref('   恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
-const nickName = ref('不吃香菜(努力版)')
+const pdfTitle = ref('纸上谈兵委员会')
+const pdfCount = ref('')
+const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
+const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const pdfNickName = ref('不吃香菜(努力版)')
 
 const isLoading = ref(false)
 const inputTopText = ref('纸上谈兵委员会')
@@ -42,7 +42,7 @@ const generateDocumentNumber = () => {
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
  const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-  count.value = `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
+  pdfCount.value = `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
 }
 
 const handleSubmit = async () => {
@@ -72,11 +72,11 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   // 设置字体大小和位置
   doc.setFontSize(36)
   doc.setTextColor(255, 0, 0) // 设置红色
-  doc.text(title.value, pageWidth / 2, 50, { align: 'center' })
+  doc.text(pdfTitle.value, pageWidth / 2, 50, { align: 'center' })
   
   doc.setFontSize(16)
   doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.text(count.value, pageWidth / 2, 81, { align: 'center' })
+  doc.text(pdfCount.value, pageWidth / 2, 81, { align: 'center' })
   //2条红色横线
   doc.setDrawColor(255, 0, 0) // 设置线条颜色为红色
   doc.line(40, 90, pageWidth - 40, 90) // 第一条横线
@@ -85,11 +85,11 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   doc.setFontSize(24)
   doc.setTextColor(255, 0, 0) // 设置红色
   const subtitleX = pageWidth  / 2
-  doc.text(subtitle.value, subtitleX, 128, { align: 'center' })
+  doc.text(pdfSubTitle.value, subtitleX, 128, { align: 'center' })
   
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(16)
-  const contentLines = doc.splitTextToSize(`${nickName.value}:\n\n${content.value}`, pageWidth-80)
+  const contentLines = doc.splitTextToSize(`${pdfNickName.value}:\n\n${pdfContent.value}`, pageWidth-80)
   
 
   doc.text(contentLines, 40, 170, { 
@@ -111,7 +111,7 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(24)
   // 添加文字
-  doc.text(`纸上谈兵委员会\n${formattedDate}`, pageWidth - 180, pageHeight - 120, { align: 'center', lineHeightFactor: 1.4 })
+  doc.text(`纸上谈兵\n${formattedDate}`, pageWidth - 180, pageHeight - 120, { align: 'center', lineHeightFactor: 1.4 })
 
   // 获取印章元素并转换为图片
   const sealElement = document.querySelector('.seal-container')
@@ -129,7 +129,7 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   const fileName = '纸上谈兵'
   doc.setProperties({
     title: fileName,
-    subject: subtitle.value,
+    subject: pdfSubTitle.value,
     author: '纸上谈兵委员会',
     keywords: '纸上谈兵,赵括,佛罗里*达州',
   })
@@ -138,7 +138,7 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   const pdfBlob = doc.output('blob')
   pdfUrl.value = URL.createObjectURL(pdfBlob)
   if (autoDownload) {
-    doc.save(`${title.value}-${count.value}.pdf`)
+    doc.save(`${pdfTitle.value}-${pdfCount.value}.pdf`)
   }
   } catch (error) {
     console.error('PDF生成失败:', error)
@@ -148,12 +148,10 @@ const genPaperTalkPdf = async (autoDownload = false) => {
 }
 
 onMounted(() => {
-  const currentNumber = getCurrentNumber()
-  if (currentNumber > 0) {
-    const currentDate=new Date()
+  const currentNumber = getCurrentNumber()==0 ? 1: getCurrentNumber()
+  const currentDate=new Date()
     const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-    count.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
-  }
+    pdfCount.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
   genPaperTalkPdf(false)
   wsConnection = connectDou()
 })
@@ -165,14 +163,35 @@ onUnmounted(() => {
 })
 
 
-const connectDou = () => {
-  const url = `ws://127.0.0.1:8888`
-  const ws = new WebSocket(url)
+const wsUrl = ref('ws://127.0.0.1:8888')
+const messages = ref([])
 
-  ws.onopen = () => {
-    console.log('WebSocket连接已建立')
+const disconnectWebSocket = () => {
+  if (wsConnection) {
+    wsConnection.close()
+    wsConnection = null
+    wsError.value = '连接已断开'
   }
+}
 
+const reconnectWebSocket = () => {
+  if (wsConnection) {
+    wsConnection.close()
+  }
+  messages.value = []
+  wsConnection = connectDou(wsUrl.value)
+}
+
+const addMessage = (message) => {
+  messages.value.unshift(message)
+}
+
+let wsConnection = null
+const wsError = ref('')
+
+const connectDou = (url) => {
+  wsError.value = ''
+  const ws = new WebSocket(url)
   /**
    * 
    *  public enum PackMsgType
@@ -199,7 +218,7 @@ const connectDou = () => {
         下播 = 9
     }
    */
-  ws.onmessage = (event) => {
+   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data)
       switch (data.Type) {
@@ -209,32 +228,57 @@ const connectDou = () => {
         case 1: // 弹幕消息
           const chatData = JSON.parse(data.Data)
           const chatUser = chatData.User
+          addMessage({
+            type: 'danmu',
+            content: chatData.Content,
+            user: chatUser
+          })
           console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
           break
         case 2: // 点赞消息
           const likeData = JSON.parse(data.Data)
           const likeUser = likeData.User
+          addMessage({
+            type: 'like',
+            content: `点赞了直播间，点赞数：${likeData.LikeCount}`,
+            user: likeUser
+          })
           console.log(`用户 ${likeUser.Nickname} 点赞了直播间，点赞数：${likeData.LikeCount}`)
           break
         case 3: // 进直播间
           const enterData = JSON.parse(data.Data)
           const enterUser = enterData.User
-          
-          console.log(`用户 ${enterUser.Nickname}${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
+          addMessage({
+            type: 'enter',
+            content: `${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`,
+            user: enterUser
+          })
+          console.log(`用户 ${enterUser.Nickname} ${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
           break
         case 4: // 关注消息
           const followData = JSON.parse(data.Data)
           const followUser = followData.User
+          addMessage({
+            type: 'follow',
+            content: `关注了主播`,
+            user: followUser
+          })
           console.log(`用户 ${followUser.Nickname} 关注了主播`)
           break
         case 5: // 礼物消息
           const giftData = JSON.parse(data.Data)
           const giftUser = giftData.User
-          console.log(`用户 ${giftUser.Nickname} 赠送礼物：${giftData.Content}`)
+          addMessage({
+            type: 'gift',
+            content: `赠送礼物：${giftData.Content}`,
+            user: giftUser
+          })
+          //console.log(`用户 ${giftUser.Nickname} 赠送礼物：${giftData.Content}`)
           break
         case 6: // 直播间统计
           const statsData = JSON.parse(data.Data)
-          //console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
+        
+          console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
           console.log(`直播间统计数据：${statsData.Content}`)
           break
         case 7: // 粉丝团消息
@@ -243,6 +287,7 @@ const connectDou = () => {
           break
         case 8: // 直播间分享
           const shareData = JSON.parse(data.Data)
+      
           console.log(`用户分享了直播间：${shareData.Content}`)
           break
         case 9: // 下播
@@ -255,26 +300,31 @@ const connectDou = () => {
       console.error('消息解析失败:', error)
     }
   }
+  ws.onopen = () => {
+    console.log('WebSocket连接已建立')
+    wsError.value = '连接已建立'
+  }
 
   ws.onerror = (error) => {
     console.error('WebSocket错误:', error)
+    wsError.value = '连接发生错误'+error
   }
 
-  ws.onclose = () => {
-    console.log('WebSocket连接已关闭')
+  ws.onclose = (event) => {
+    console.log('WebSocket连接已关闭', event)
+    if (!event.wasClean) {
+      wsError.value = '连接异常关闭'+event.reason
+    }
   }
-
   return ws
 }
-
-let wsConnection = null
 
 
 const handleDownload = () => {
   if (pdfUrl.value) {
     const downloadLink = document.createElement('a')
     downloadLink.href = pdfUrl.value
-    downloadLink.download = `${title.value}-${count.value}.pdf`
+    downloadLink.download = `${pdfTitle.value}-${pdfCount.value}.pdf`
     document.body.appendChild(downloadLink)
     downloadLink.click()
     document.body.removeChild(downloadLink)
@@ -289,6 +339,7 @@ const handlePrint = () => {
     }
   }
 }
+
 </script>
 
 <template>
@@ -296,13 +347,47 @@ const handlePrint = () => {
     <div class="left-panel">
       <div class="logo-section">
         <img src="@/assets/logo.svg" alt="Logo" class="logo" />
-        <span class="app-name">纸上谈兵 荣耀</span>
+        <div class="ws-connection">
+          <div class="ws-input-group">
+            <input
+              v-model="wsUrl"
+              type="text"
+              placeholder="WebSocket地址"
+              class="ws-input"
+            />
+            <button @click="reconnectWebSocket" class="ws-connect-btn">
+              {{ wsConnection ? '重连' : '连接' }}
+            </button>
+            <button v-if="wsConnection && wsConnection.readyState === 1" @click="disconnectWebSocket" class="ws-disconnect-btn">
+              断开
+            </button>
+          </div>
+          <div class="ws-status">
+            状态：{{ 
+              wsConnection ? 
+                wsConnection.readyState === 1 ? '已连接' : 
+                wsConnection.readyState === 0 ? '正在连接...' : 
+                wsConnection.readyState === 2 ? '正在关闭...' : 
+                wsConnection.readyState === 3 ? '连接已关闭' : '未知状态' 
+              : '未连接' 
+            }}
+            <span v-if="wsError" class="ws-error">{{ wsError }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-window">
+        <div class="chat-messages" ref="chatMessages">
+          <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
+            <div class="user">{{ message.user.Nickname  || '匿名用户' }}</div>
+            <div class="content">{{ message.content }}</div>
+          </div>
+        </div>
       </div>
       
       <div class="form-section">
         <div class="input-group">
           <input
-            v-model="title"
+            v-model="pdfTitle"
             type="text"
             placeholder="请输入一级标题"
             class="input-field"
@@ -311,7 +396,7 @@ const handlePrint = () => {
         
         <div class="input-group">
           <input
-            v-model="subtitle"
+            v-model="pdfSubTitle"
             type="text"
             placeholder="请输入二级标题"
             class="input-field"
@@ -320,7 +405,7 @@ const handlePrint = () => {
 
         <div class="input-group">
           <input
-            v-model="nickName"
+            v-model="pdfNickName"
             type="text"
             placeholder="请输入昵称"
             class="input-field"
@@ -329,7 +414,7 @@ const handlePrint = () => {
         
         <div class="input-group">
           <textarea
-            v-model="content"
+            v-model="pdfContent"
             placeholder="请输入内容（最多5行）"
             class="input-field content-area"
             rows="2"
@@ -420,7 +505,7 @@ const handlePrint = () => {
 }
 
 .icon-button {
-  background: none;
+  background-color: #f5f5f5;
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 0.2rem;
@@ -482,16 +567,130 @@ const handlePrint = () => {
   margin-right: 1rem;
 }
 
-.app-name {
-  font-size: 1.5rem;
+.ws-connection {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 0;
+  width: 100%;
+}
+
+.ws-input-group {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.ws-status {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.ws-error {
+  display: block;
+  margin-top: 4px;
+  color: #ff4d4f;
+  font-size: 12px;
+}
+
+.ws-input {
+  padding: 0.5rem;
+  border: 1px solid #000000;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 200px;
+}
+
+.ws-connect-btn {
+  padding: 0.5rem 1rem;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.ws-connect-btn:hover {
+  background-color: #ff6666;
+}
+
+.chat-window {
+  width: 100%;
+  margin-top: 0;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.chat-messages {
+  height: 260px;
+  overflow-y: auto;
+  padding: 15px;
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.message {
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message .user {
   font-weight: bold;
-  color: #333;
+  margin-right: 8px;
+}
+
+.message.danmu {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.message.gift {
+  background-color: rgba(255, 192, 203, 0.2);
+  color: #ff4d4f;
+}
+
+.message.enter {
+  background-color: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+}
+
+.message.follow {
+  background-color: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.message.like {
+  background-color: rgba(250, 173, 20, 0.1);
+  color: #faad14;
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .input-group {
@@ -501,7 +700,7 @@ const handlePrint = () => {
 
 .input-field {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.4rem;
   border: 1px solid #000000;
   border-radius: 4px;
   font-size: 0.9rem;
@@ -521,7 +720,7 @@ const handlePrint = () => {
 }
 
 .content-area {
-  min-height: 200px;
+  min-height: 120px;
   resize: vertical;
 }
 
