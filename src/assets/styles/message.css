@@ -1,0 +1,24 @@
+.message.danmu {
+  background-color: rgba(0, 0, 139, 0.8);
+  color: #fff;
+}
+
+.message.gift {
+  background-color: rgba(255, 192, 203, 0.8);
+  color: #ff4d4f;
+}
+
+.message.enter {
+  background-color: rgba(24, 144, 255, 0.8);
+  color: #1890ff;
+}
+
+.message.follow {
+  background-color: rgba(82, 196, 26, 0.8);
+  color: #52c41a;
+}
+
+.message.like {
+  background-color: rgba(250, 173, 20, 0.8);
+  color: #030303;
+}

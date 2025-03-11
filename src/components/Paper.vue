@@ -10,7 +10,7 @@ import VuePdfEmbed from 'vue-pdf-embed'
 const pdfTitle = ref('纸上谈兵委员会')
 const pdfCount = ref('')
 const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
-const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 const pdfNickName = ref('不吃香菜(努力版)')
 
 const isLoading = ref(false)
@@ -131,7 +131,7 @@ const genPaperTalkPdf = async (autoDownload = false) => {
     title: fileName,
     subject: pdfSubTitle.value,
     author: '纸上谈兵委员会',
-    keywords: '纸上谈兵,赵括,佛罗里*达州',
+    keywords: '纸上谈兵|赵括|佛罗里|达州',
   })
   
   // 生成PDF并根据参数决定是否自动下载
@@ -233,37 +233,38 @@ const connectDou = (url) => {
             content: chatData.Content,
             user: chatUser
           })
-          console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
+          // console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
           break
         case 2: // 点赞消息
           const likeData = JSON.parse(data.Data)
           const likeUser = likeData.User
           addMessage({
             type: 'like',
-            content: `点赞了直播间，点赞数：${likeData.LikeCount}`,
+            content: `${likeData.Content}`,
             user: likeUser
           })
-          console.log(`用户 ${likeUser.Nickname} 点赞了直播间，点赞数：${likeData.LikeCount}`)
+          //console.log(`点赞了直播间，点赞数：${JSON.stringify(likeData)}`)
+          console.log(`用户 ${likeUser.Nickname} 点赞了直播间，点赞数：${likeData.Content}`)
           break
         case 3: // 进直播间
-          const enterData = JSON.parse(data.Data)
-          const enterUser = enterData.User
-          addMessage({
-            type: 'enter',
-            content: `${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`,
-            user: enterUser
-          })
-          console.log(`用户 ${enterUser.Nickname} ${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
-          break
+          // const enterData = JSON.parse(data.Data)
+          // const enterUser = enterData.User
+          // addMessage({
+          //   type: 'enter',
+          //   content: `${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`,
+          //   user: enterUser
+          // })
+          // console.log(`用户 ${enterUser.Nickname} ${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
+           break
         case 4: // 关注消息
-          const followData = JSON.parse(data.Data)
-          const followUser = followData.User
-          addMessage({
-            type: 'follow',
-            content: `关注了主播`,
-            user: followUser
-          })
-          console.log(`用户 ${followUser.Nickname} 关注了主播`)
+          // const followData = JSON.parse(data.Data)
+          // const followUser = followData.User
+          // addMessage({
+          //   type: 'follow',
+          //   content: `关注了主播`,
+          //   user: followUser
+          // })
+          // console.log(`用户 ${followUser.Nickname} 关注了主播`)
           break
         case 5: // 礼物消息
           const giftData = JSON.parse(data.Data)
@@ -277,8 +278,11 @@ const connectDou = (url) => {
           break
         case 6: // 直播间统计
           const statsData = JSON.parse(data.Data)
-        
-          console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
+          addMessage({
+            type: 'gift',
+            content: `直播间统计数据：${statsData.Content}`,
+          })
+         // console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
           console.log(`直播间统计数据：${statsData.Content}`)
           break
         case 7: // 粉丝团消息
@@ -287,10 +291,18 @@ const connectDou = (url) => {
           break
         case 8: // 直播间分享
           const shareData = JSON.parse(data.Data)
-      
-          console.log(`用户分享了直播间：${shareData.Content}`)
+          //console.log(`分享了直播间：${JSON.stringify(shareData)}`)
+          addMessage({
+            type: 'share',
+            content: `分享了直播间：${shareData.Content}`,
+            user:shareData.User
+          })
           break
         case 9: // 下播
+        addMessage({
+            type: 'share',
+            content: `主播已下播`,
+          })
           console.log('主播已下播')
           break
         default:
@@ -378,7 +390,7 @@ const handlePrint = () => {
       <div class="chat-window">
         <div class="chat-messages" ref="chatMessages">
           <div v-for="(message, index) in messages" :key="index" :class="['message', message.type]">
-            <div class="user">{{ message.user.Nickname  || '匿名用户' }}</div>
+            <div class="user">{{ message.user?.Nickname  || 'system' }}</div>
             <div class="content">{{ message.content }}</div>
           </div>
         </div>
@@ -665,6 +677,7 @@ const handlePrint = () => {
 
 .message.danmu {
   background-color: rgba(255, 255, 255, 0.8);
+  color: #f0f0f0;
 }
 
 .message.gift {
