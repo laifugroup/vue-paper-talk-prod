@@ -398,7 +398,8 @@ const handlePrint = () => {
   <div class="paper-container">
      <div class="left-panel">
       <div class="logo-section">
-             
+        <img src="@/assets/logo.svg" alt="Logo" class="logo" />
+        
         <div class="ws-connection">
           <div class="ws-input-group">
             <input
