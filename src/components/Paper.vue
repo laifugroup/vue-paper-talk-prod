@@ -7,9 +7,14 @@ import Seal from './Seal.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
 
+
+const currentDate=new Date()
+const currentYear = currentDate.getFullYear()
+const nextYear = currentYear+1
+
 const pdfTitle = ref('纸上谈兵委员会')
 const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
-const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const pdfContent = ref(`   恭喜您在${currentYear}-${nextYear}年度'纸上谈兵'中脱颖而出，荣获佳绩！\n特授予荣誉头衔'常胜将军'称号，特此发本奖状，以表鼓励。`)
 const pdfNickName = ref('不吃香菜(努力版)')
 
 const isLoading = ref(false)
@@ -55,8 +60,8 @@ const formatNumber = (number) => {
 
 // 生成文档编号
 const generateDocumentNumber = () => {
-  const currentDate=new Date()
-  const currentYear = currentDate.getFullYear()
+  
+ 
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
  const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
@@ -136,13 +141,22 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
     }
   })
 
+
+//添加底部 编码文字 NO.202303120011 最后一位为20230312001的对8取余的校验位
+  doc.setFontSize(15)
+  doc.setTextColor(0, 0, 0) // 恢复黑色
+  const numbers = pdfMessage.pdfCount.match(/\d+/g); // 提取所有数字
+  const sum = numbers.reduce((acc, num) => acc + parseInt(num), 0) % 8; // 计算总和并对 8 取余
+  const NO = `${numbers.join('')}${sum===4?9:sum}`; // 去掉逗号并拼接结果
+  doc.text(`编码：NO.${NO}`, pageWidth / 2, pageHeight-14, { align: 'center' })
+
   // 添加右下角文字和日期
   const currentDate = new Date()
   const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(24)
   // 添加文字
-  doc.text(`纸上谈兵\n${formattedDate}`, pageWidth - 180, pageHeight - 120, { align: 'center', lineHeightFactor: 1.4 })
+  doc.text(`纸上谈兵\n${formattedDate}`, pageWidth - 180, pageHeight - 150, { align: 'center', lineHeightFactor: 1.4 })
 
   // 获取印章元素并转换为图片
   const sealElement = document.querySelector('.seal-container')
@@ -153,7 +167,7 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
       logging: false
     })
     const sealDataUrl = canvas.toDataURL('image/png')
-    doc.addImage(sealDataUrl, 'PNG', pageWidth - 280, pageHeight - 220, 200, 200)
+    doc.addImage(sealDataUrl, 'PNG', pageWidth - 280, pageHeight - 240, 200, 200)
   }
 
   // 设置文件名并生成PDF
