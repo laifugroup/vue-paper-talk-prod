@@ -8,9 +8,8 @@ import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
 
 const pdfTitle = ref('纸上谈兵委员会')
-const pdfCount = ref('')
 const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
-const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵挑战赛`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
+const pdfContent = ref('   恭喜您在2025-2026年度`纸上谈兵`中脱颖而出，荣获佳绩！\n特授予荣誉头衔`常胜将军`称号，特此发本奖状，以表鼓励。')
 const pdfNickName = ref('不吃香菜(努力版)')
 
 const isLoading = ref(false)
@@ -18,6 +17,25 @@ const inputTopText = ref('纸上谈兵委员会')
 const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
 const pdfUrl = ref('')
+
+
+
+const pdfQueue = ref([]);
+let isProcessing = false
+
+const processPdfQueue = async () => {
+  if (isProcessing) return
+  isProcessing = true
+  while (pdfQueue.value.length > 0) {
+    const pdfData = pdfQueue.value.shift()
+    pdfNickName.value=pdfData.pdfNickName
+    await genPaperTalkPdfFromDouYin(pdfData)
+  }
+  isProcessing = false
+}
+
+
+
 
 // 获取当前编号
 const getCurrentNumber = () => {
@@ -42,15 +60,30 @@ const generateDocumentNumber = () => {
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
  const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-  pdfCount.value = `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
+  return `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
 }
 
 const handleSubmit = async () => {
-  generateDocumentNumber()
-  genPaperTalkPdf(true)
+  const count=generateDocumentNumber()
+  const pdfMessage={
+    pdfTitle:pdfTitle.value,
+    pdfSubTitle:pdfSubTitle.value,
+    pdfContent:pdfContent.value,
+    pdfNickName:pdfNickName.value,
+    pdfCount:count,
+  }
+  genPaperTalkPdf(true,pdfMessage)
 }
 
-const genPaperTalkPdf = async (autoDownload = false) => {
+
+
+const genPaperTalkPdfFromDouYin = async (pdfMessage) => {
+  const count=generateDocumentNumber()
+  pdfMessage.pdfCount=count
+  genPaperTalkPdf(true,pdfMessage)
+}
+
+const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
   isLoading.value = true
   try {
     const doc = new jsPDF({
@@ -72,11 +105,11 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   // 设置字体大小和位置
   doc.setFontSize(36)
   doc.setTextColor(255, 0, 0) // 设置红色
-  doc.text(pdfTitle.value, pageWidth / 2, 50, { align: 'center' })
+  doc.text(pdfMessage.pdfTitle, pageWidth / 2, 50, { align: 'center' })
   
   doc.setFontSize(16)
   doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.text(pdfCount.value, pageWidth / 2, 81, { align: 'center' })
+  doc.text(pdfMessage.pdfCount, pageWidth / 2, 81, { align: 'center' })
   //2条红色横线
   doc.setDrawColor(255, 0, 0) // 设置线条颜色为红色
   doc.line(40, 90, pageWidth - 40, 90) // 第一条横线
@@ -85,13 +118,11 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   doc.setFontSize(24)
   doc.setTextColor(255, 0, 0) // 设置红色
   const subtitleX = pageWidth  / 2
-  doc.text(pdfSubTitle.value, subtitleX, 128, { align: 'center' })
+  doc.text(pdfMessage.pdfSubTitle, subtitleX, 128, { align: 'center' })
   
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(16)
-  const contentLines = doc.splitTextToSize(`${pdfNickName.value}:\n\n${pdfContent.value}`, pageWidth-80)
-  
-
+  const contentLines = doc.splitTextToSize(`${pdfMessage.pdfNickName}:\n\n${pdfMessage.pdfContent}`, pageWidth-80)
   doc.text(contentLines, 40, 170, { 
     align: 'left', 
     renderingMode: 'fill', 
@@ -126,10 +157,9 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   }
 
   // 设置文件名并生成PDF
-  const fileName = '纸上谈兵'
   doc.setProperties({
-    title: fileName,
-    subject: pdfSubTitle.value,
+    title: pdfMessage.pdfSubTitle,
+    subject: pdfMessage.pdfCount,
     author: '纸上谈兵委员会',
     keywords: '纸上谈兵|赵括|佛罗里|达州',
   })
@@ -138,7 +168,7 @@ const genPaperTalkPdf = async (autoDownload = false) => {
   const pdfBlob = doc.output('blob')
   pdfUrl.value = URL.createObjectURL(pdfBlob)
   if (autoDownload) {
-    doc.save(`${pdfTitle.value}-${pdfCount.value}.pdf`)
+    doc.save(`${pdfMessage.pdfTitle}-${pdfMessage.pdfCount}.pdf`)
   }
   } catch (error) {
     console.error('PDF生成失败:', error)
@@ -151,8 +181,15 @@ onMounted(() => {
   const currentNumber = getCurrentNumber()==0 ? 1: getCurrentNumber()
   const currentDate=new Date()
     const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-    pdfCount.value = `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
-  genPaperTalkPdf(false)
+    const count= `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
+    const pdfMessage={
+    pdfTitle:pdfTitle.value,
+    pdfSubTitle:pdfSubTitle.value,
+    pdfContent:pdfContent.value,
+    pdfNickName:pdfNickName.value,
+    pdfCount:count,
+  }
+  genPaperTalkPdf(false,pdfMessage)
   wsConnection = connectDou()
 })
 
@@ -233,6 +270,9 @@ const connectDou = (url) => {
             content: chatData.Content,
             user: chatUser
           })
+
+          pdfQueue.value.push({ pdfTitle: pdfTitle.value, pdfSubTitle: pdfSubTitle.value, pdfContent: pdfContent.value, pdfNickName: chatUser.Nickname })
+          processPdfQueue()
           // console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
           break
         case 2: // 点赞消息
@@ -356,9 +396,9 @@ const handlePrint = () => {
 
 <template>
   <div class="paper-container">
-    <div class="left-panel">
+     <div class="left-panel">
       <div class="logo-section">
-        <img src="@/assets/logo.svg" alt="Logo" class="logo" />
+             
         <div class="ws-connection">
           <div class="ws-input-group">
             <input
@@ -676,8 +716,8 @@ const handlePrint = () => {
 }
 
 .message.danmu {
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #f0f0f0;
+  background-color: rgba(255, 192, 203, 0.2);
+  color: #d30a0a;
 }
 
 .message.gift {
