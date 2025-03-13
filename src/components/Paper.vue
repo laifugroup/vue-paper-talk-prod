@@ -11,10 +11,11 @@ import VuePdfEmbed from 'vue-pdf-embed'
 const currentDate=new Date()
 const currentYear = currentDate.getFullYear()
 const nextYear = currentYear+1
+const formattedDate = `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月${currentDate.getDate()}日`;
 
 const pdfTitle = ref('纸上谈兵委员会')
 const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
-const pdfContent = ref(`   恭喜您在${currentYear}-${nextYear}年度'纸上谈兵'中脱颖而出，荣获佳绩！\n特授予荣誉头衔'常胜将军'称号，特此发本奖状，以表鼓励。`)
+const pdfContent = ref(`    恭喜您在${currentYear}-${nextYear}年度'纸上谈兵'中脱颖而出，荣获佳绩！经评审委员会一致决定，特授予您“常胜将军”荣誉称号，以表彰您的突出贡献！`)
 const pdfNickName = ref('不吃香菜(努力版)')
 
 const isLoading = ref(false)
@@ -42,15 +43,15 @@ const processPdfQueue = async () => {
 
 
 
-// 获取当前编号
+// 获取当前编号 编号需要每天更新 从1开始
 const getCurrentNumber = () => {
-  const currentNumber = localStorage.getItem('paperNumber')
+  const currentNumber = localStorage.getItem(formattedDate)
   return currentNumber ? parseInt(currentNumber) : 0
 }
 
-// 更新编号
+// 更新编号 编号需要每天更新 从1开始
 const updateNumber = (number) => {
-  localStorage.setItem('paperNumber', number.toString())
+  localStorage.setItem(formattedDate, number.toString())
 }
 
 // 格式化编号为三位数
@@ -60,8 +61,6 @@ const formatNumber = (number) => {
 
 // 生成文档编号
 const generateDocumentNumber = () => {
-  
- 
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
  const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
@@ -127,28 +126,25 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
   
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(16)
-  const contentLines = doc.splitTextToSize(`${pdfMessage.pdfNickName}:\n\n${pdfMessage.pdfContent}`, pageWidth-80)
+  const contentLines = doc.splitTextToSize(`${pdfMessage.pdfNickName}:\n\n${pdfMessage.pdfContent}`, pageWidth-120)
+  //
+  console.log(contentLines)
   doc.text(contentLines, 40, 170, { 
     align: 'left', 
     renderingMode: 'fill', 
-    charSpace: 1.5,  // 增加字符间距
+    charSpace: 1.2,  // 增加字符间距
     preserveLeadingSpaces: true, 
-    lineHeightFactor: 1.5, 
-    maxWidth: pageWidth-80,
-    flags: {
-      noBOM: true,
-      autoencode: true
-    }
+    lineHeightFactor: 1.2, 
   })
 
 
 //添加底部 编码文字 NO.202303120011 最后一位为20230312001的对8取余的校验位
-  doc.setFontSize(15)
+  doc.setFontSize(14)
   doc.setTextColor(0, 0, 0) // 恢复黑色
   const numbers = pdfMessage.pdfCount.match(/\d+/g); // 提取所有数字
   const sum = numbers.reduce((acc, num) => acc + parseInt(num), 0) % 8; // 计算总和并对 8 取余
   const NO = `${numbers.join('')}${sum===4?9:sum}`; // 去掉逗号并拼接结果
-  doc.text(`编码：NO.${NO}`, pageWidth / 2, pageHeight-14, { align: 'center' })
+  doc.text(`编号：NO.${NO}`, pageWidth / 2, pageHeight-14, { align: 'center' })
 
   // 添加右下角文字和日期
   const currentDate = new Date()
