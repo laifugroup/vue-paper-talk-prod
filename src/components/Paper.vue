@@ -4,6 +4,7 @@ import { jsPDF } from 'jspdf'
 //import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Regular.ttf' 字体没有空格
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
 import Seal from './Seal.vue'
+import MusicPlayer from './MusicPlayer.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
 
@@ -435,6 +436,11 @@ const handlePrint = () => {
               : '未连接' 
             }}
             <span v-if="wsError" class="ws-error">{{ wsError }}</span>
+
+            <div class="music">
+              <MusicPlayer />
+            </div>
+
           </div>
         </div>
       </div>
