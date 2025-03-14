@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue'
+//import { defineProps } from 'vue'
 import html2canvas from 'html2canvas'
 
 const props = defineProps({
