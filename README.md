@@ -10,6 +10,9 @@
 ## 项目说明
 - 项目基于Vue 3和Vite开发，使用了Vue 3的Composition API和TypeScript。
 
+## 线上展示地址
+ [线上查看](https://paper-talk.newbeexx.com/)
+ 
 ## 项目运行
 ```sh
 pnpm install
