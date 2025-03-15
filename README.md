@@ -2,7 +2,7 @@
 
 ## 项目介绍
 一个基于Vue 3和Vite开发的抖音发奖状pdf系统。
-* 系统会还需要  [抓取抖音弹幕](https://gitee.com/apebyte/dy-barrage-grab)
+* 系统运行还需要  [抓取抖音弹幕](https://gitee.com/apebyte/dy-barrage-grab)
 ## 项目效果
 
 ![项目截图](/images/paper.png)
