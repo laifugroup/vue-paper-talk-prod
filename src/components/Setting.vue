@@ -204,6 +204,6 @@ const firstTitle = ref('狮子湖越野挑战赛')
   font-size: 2rem;
   text-align: center;
   color: #ff0000;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 </style>
