@@ -46,12 +46,11 @@ const formatNumber = (number) => {
 const generateDocumentNumber = () => {
   const nextNumber = getCurrentNumber() + 1
   updateNumber(nextNumber)
- const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-  return `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
+ const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}月`
+  return `纸上谈兵(${currentYear})${NO}`
 }
 
 const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
-  console.log("DDDDDDD")
   isLoading.value = true
   try {
     const doc = new jsPDF({
@@ -112,7 +111,7 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
 
   // 添加右下角文字和日期
   const currentDate = new Date()
-  const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
+  const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月`
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(24)
   // 添加文字
@@ -133,16 +132,16 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
   // 设置文件名并生成PDF
   doc.setProperties({
     title: pdfMessage.pdfSubTitle,
-    subject: pdfMessage.pdfCount,
-    author: '纸上谈兵委员会',
-    keywords: '纸上谈兵|赵括|佛罗里|达州',
+    subject: pdfMessage.pdfNickName,
+    author: pdfMessage.pdfTitle,
+    keywords: pdfMessage.pdfTitle,
   })
   
   // 生成PDF并根据参数决定是否自动下载
   const pdfBlob = doc.output('blob')
   pdfUrl.value = URL.createObjectURL(pdfBlob)
   if (autoDownload) {
-    doc.save(`${pdfMessage.pdfTitle}-${pdfMessage.pdfCount}.pdf`)
+    doc.save(`${pdfMessage.pdfTitle}-${pdfMessage.pdfNickName}.pdf`)
   }
   } catch (error) {
     console.error('PDF生成失败:', error)
@@ -154,8 +153,8 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
 onMounted(() => {
   const currentNumber = getCurrentNumber()==0 ? 1: getCurrentNumber()
   const currentDate=new Date()
-    const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
-    const count= `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
+    const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}月`
+    const count= `纸上谈兵(${currentDate.getFullYear()})年度${NO}`
     const pdfMessage={
     pdfTitle:pdfTitle.value,
     pdfSubTitle:pdfSubTitle.value,
