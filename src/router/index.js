@@ -17,7 +17,7 @@ const router = createRouter({
       component: SealView,
     },
     {
-      path: '/settings',
+      path: '/init',
       name: 'settings',
       component: SettingsView,
     }
