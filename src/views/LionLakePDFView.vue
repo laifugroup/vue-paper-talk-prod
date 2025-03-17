@@ -1,13 +1,12 @@
 <script setup>
-import Setting from '../components/Setting.vue'
+import LionLakePDF from '../components/LionLakePDF.vue'
 
 </script>
 
 <template>
   <div class="pager-container">
     <div class="paper-section">
-      <!-- <Seal/> -->
-      <Setting />
+      <LionLakePDF />
     </div>
   </div>
 </template>

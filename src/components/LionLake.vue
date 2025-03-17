@@ -12,7 +12,7 @@ const inputBottomCode = ref('51000020161224')
 const pdfTitle = ref('狮子湖越野挑战赛委员会')
 const pdfSubTitle = ref('第一届狮子湖越野挑战赛')
 const pdfContent = ref(`    恭喜您在2025-2026年度"狮子湖越野挑战赛"中完成挑战，特此证明。\n\n特授予您"狮子湖极限挑战者"荣誉称号！`)
-const pdfNickName = ref('川A78BBQ')
+const pdfNickName = ref('川A78BBQ车主')
 const firstTitle = ref('狮子湖越野挑战赛')
 </script>
 
@@ -80,7 +80,18 @@ const firstTitle = ref('狮子湖越野挑战赛')
 
       </div>
       <!--增加生成按钮-->
-      <button @click="router.push('/lion')" class="submit-btn">
+      <button @click="router.push({
+        path: '/lionLakePDF',
+        query: {
+          pdfTitle,
+          pdfSubTitle,
+          pdfContent,
+          pdfNickName,
+          inputTopText,
+          inputCenterText,
+          inputBottomCode
+        }
+      })" class="submit-btn">
         生成证书
       </button>
     </div>

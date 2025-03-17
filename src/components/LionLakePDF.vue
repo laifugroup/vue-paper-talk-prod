@@ -26,24 +26,6 @@ const inputBottomCode = ref('51000020161224')
 const pdfUrl = ref('')
 
 
-
-const pdfQueue = ref([]);
-let isProcessing = false
-
-const processPdfQueue = async () => {
-  if (isProcessing) return
-  isProcessing = true
-  while (pdfQueue.value.length > 0) {
-    const pdfData = pdfQueue.value.shift()
-    pdfNickName.value=pdfData.pdfNickName
-    await genPaperTalkPdfFromDouYin(pdfData)
-  }
-  isProcessing = false
-}
-
-
-
-
 // 获取当前编号 编号需要每天更新 从1开始
 const getCurrentNumber = () => {
   const currentNumber = localStorage.getItem(formattedDate)
@@ -68,27 +50,8 @@ const generateDocumentNumber = () => {
   return `纸上谈兵(${currentYear})${NO}第${formatNumber(nextNumber)}号`
 }
 
-const handleSubmit = async () => {
-  const count=generateDocumentNumber()
-  const pdfMessage={
-    pdfTitle:pdfTitle.value,
-    pdfSubTitle:pdfSubTitle.value,
-    pdfContent:pdfContent.value,
-    pdfNickName:pdfNickName.value,
-    pdfCount:count,
-  }
-  genPaperTalkPdf(true,pdfMessage)
-}
-
-
-
-const genPaperTalkPdfFromDouYin = async (pdfMessage) => {
-  const count=generateDocumentNumber()
-  pdfMessage.pdfCount=count
-  genPaperTalkPdf(true,pdfMessage)
-}
-
 const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
+  console.log("DDDDDDD")
   isLoading.value = true
   try {
     const doc = new jsPDF({
@@ -201,193 +164,17 @@ onMounted(() => {
     pdfCount:count,
   }
   genPaperTalkPdf(false,pdfMessage)
-  wsConnection = connectDou()
 })
 
 onUnmounted(() => {
-  if (wsConnection) {
-    wsConnection.close()
-  }
+ 
 })
-
-
-const wsUrl = ref('ws://127.0.0.1:8888')
-const messages = ref([])
-
-const disconnectWebSocket = () => {
-  if (wsConnection) {
-    wsConnection.close()
-    wsConnection = null
-    wsError.value = '连接已断开'
-  }
-}
-
-const reconnectWebSocket = () => {
-  if (wsConnection) {
-    wsConnection.close()
-  }
-  messages.value = []
-  wsConnection = connectDou(wsUrl.value)
-}
-
-const addMessage = (message) => {
-  messages.value.unshift(message)
-}
-
-let wsConnection = null
-const wsError = ref('')
-
-const connectDou = (url) => {
-  wsError.value = ''
-  const ws = new WebSocket(url)
-  /**
-   * 
-   *  public enum PackMsgType
-    {
-        [Description("无")]
-        无 = 0,       
-        [Description("消息")] 
-        弹幕消息 = 1,
-        [Description("点赞")]
-        点赞消息 = 2,
-        [Description("进房")]
-        进直播间 = 3,
-        [Description("关注")]
-        关注消息 = 4,
-        [Description("礼物")]
-        礼物消息 = 5,
-        [Description("统计")]
-        直播间统计 = 6,
-        [Description("粉团")]
-        粉丝团消息 = 7,
-        [Description("分享")]
-        直播间分享 = 8,
-        [Description("下播")]
-        下播 = 9
-    }
-   */
-   ws.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data)
-      switch (data.Type) {
-        case 0: // 无
-          console.log('收到空消息')
-          break
-        case 1: // 弹幕消息
-          const chatData = JSON.parse(data.Data)
-          const chatUser = chatData.User
-          addMessage({
-            type: 'danmu',
-            content: chatData.Content,
-            user: chatUser
-          })
-
-          pdfQueue.value.push({ pdfTitle: pdfTitle.value, pdfSubTitle: pdfSubTitle.value, pdfContent: pdfContent.value, pdfNickName: chatUser.Nickname })
-          processPdfQueue()
-          // console.log(`用户 ${chatUser.Nickname}(等级${chatUser.Level}) 发送消息：${chatData.Content}`)
-          break
-        case 2: // 点赞消息
-          const likeData = JSON.parse(data.Data)
-          const likeUser = likeData.User
-          addMessage({
-            type: 'like',
-            content: `${likeData.Content}`,
-            user: likeUser
-          })
-          //console.log(`点赞了直播间，点赞数：${JSON.stringify(likeData)}`)
-          console.log(`用户 ${likeUser.Nickname} 点赞了直播间，点赞数：${likeData.Content}`)
-          break
-        case 3: // 进直播间
-          // const enterData = JSON.parse(data.Data)
-          // const enterUser = enterData.User
-          // addMessage({
-          //   type: 'enter',
-          //   content: `${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`,
-          //   user: enterUser
-          // })
-          // console.log(`用户 ${enterUser.Nickname} ${enterUser.FansLevel ? `(粉丝团${enterUser.FansLevel}级)` : ''} 进入直播间，当前人数：${enterData.CurrentCount}`)
-           break
-        case 4: // 关注消息
-          // const followData = JSON.parse(data.Data)
-          // const followUser = followData.User
-          // addMessage({
-          //   type: 'follow',
-          //   content: `关注了主播`,
-          //   user: followUser
-          // })
-          // console.log(`用户 ${followUser.Nickname} 关注了主播`)
-          break
-        case 5: // 礼物消息
-          const giftData = JSON.parse(data.Data)
-          const giftUser = giftData.User
-          addMessage({
-            type: 'gift',
-            content: `赠送礼物：${giftData.Content}`,
-            user: giftUser
-          })
-          //console.log(`用户 ${giftUser.Nickname} 赠送礼物：${giftData.Content}`)
-          break
-        case 6: // 直播间统计
-          const statsData = JSON.parse(data.Data)
-          addMessage({
-            type: 'gift',
-            content: `直播间统计数据：${statsData.Content}`,
-          })
-         // console.log(`直播间统计数据：${JSON.stringify(statsData)}`)
-          console.log(`直播间统计数据：${statsData.Content}`)
-          break
-        case 7: // 粉丝团消息
-          const fansData = JSON.parse(data.Data)
-          console.log(`粉丝团消息：${JSON.stringify(fansData)}`)
-          break
-        case 8: // 直播间分享
-          const shareData = JSON.parse(data.Data)
-          //console.log(`分享了直播间：${JSON.stringify(shareData)}`)
-          addMessage({
-            type: 'share',
-            content: `分享了直播间：${shareData.Content}`,
-            user:shareData.User
-          })
-          break
-        case 9: // 下播
-        addMessage({
-            type: 'share',
-            content: `主播已下播`,
-          })
-          console.log('主播已下播')
-          break
-        default:
-          console.log('未知消息类型:', data)
-      }
-    } catch (error) {
-      console.error('消息解析失败:', error)
-    }
-  }
-  ws.onopen = () => {
-    console.log('WebSocket连接已建立')
-    wsError.value = '连接已建立'
-  }
-
-  ws.onerror = (error) => {
-    console.error('WebSocket错误:', error)
-    wsError.value = '连接发生错误'+error
-  }
-
-  ws.onclose = (event) => {
-    console.log('WebSocket连接已关闭', event)
-    if (!event.wasClean) {
-      wsError.value = '连接异常关闭'+event.reason
-    }
-  }
-  return ws
-}
-
 
 const handleDownload = () => {
   if (pdfUrl.value) {
     const downloadLink = document.createElement('a')
     downloadLink.href = pdfUrl.value
-    downloadLink.download = `${pdfTitle.value}-${pdfCount.value}.pdf`
+    downloadLink.download = `${pdfTitle.value}-${pdfNickName.value}.pdf`
     document.body.appendChild(downloadLink)
     downloadLink.click()
     document.body.removeChild(downloadLink)
@@ -402,10 +189,20 @@ const handlePrint = () => {
     }
   }
 }
-const router = useRouter()
+const router=useRouter()
+
+const route =router.currentRoute.value
+// 从路由参数中获取值，如果没有则使用默认值
+pdfTitle.value = route.query.pdfTitle || '狮子湖越野挑战赛委员会'
+pdfSubTitle.value = route.query.pdfSubTitle || '成都狮子湖越野挑战赛'
+pdfContent.value = route.query.pdfContent || `    恭喜您在${currentYear}-${nextYear}年度"狮子湖越野挑战赛"中完成挑战，特此证明。\n\n特授予您"狮子湖极限挑战者"荣誉称号！`
+pdfNickName.value = route.query.pdfNickName || '川A78BBQ'
+inputTopText.value = route.query.inputTopText || '狮子湖越野挑战赛委员会'
+inputCenterText.value = route.query.inputCenterText || '官方认证'
+inputBottomCode.value = route.query.inputBottomCode || '51000020161224'
 
 const handleSetting = () => {
-  router.push('/settings')
+  router.push('/lionLake')
 }
 </script>
 
@@ -441,26 +238,28 @@ const handleSetting = () => {
 .paper-container {
   display: flex;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color:#f5f5f5;
   border: none;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 0;
 }
 
 .center-panel {
   flex: 1;
-  max-width: 800px;
-  padding: 2rem;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 100vh;
+  padding: 1rem;
+  background-color:rgb(218, 18, 18);
+  border-radius: 0;
+  box-shadow: none;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .action-buttons {
-  position: absolute;
-  top: 1rem;
+  position: fixed;
+  bottom: 1rem;
   right: 1rem;
   display: flex;
   gap: 0.5rem;
@@ -689,10 +488,13 @@ const handleSetting = () => {
 }
 
 .pdf-preview {
+  flex: 1;
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 2rem);
   background-color: white;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  display: flex;
+  justify-content: center;
 }
 
 .seal-view-container {
