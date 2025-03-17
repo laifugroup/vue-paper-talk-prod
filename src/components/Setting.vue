@@ -10,7 +10,7 @@ const inputBottomCode = ref('51000020161224')
 
 
 const pdfTitle = ref('狮子湖越野挑战赛委员会')
-const pdfSubTitle = ref('成都狮子湖越野挑战赛')
+const pdfSubTitle = ref('第一届狮子湖越野挑战赛')
 const pdfContent = ref(`    恭喜您在2023-2024年度"狮子湖越野挑战赛"中完成挑战，特此证明。\n\n特授予您"狮子湖极限挑战者"荣誉称号！`)
 const pdfNickName = ref('川A78BBQ')
 const firstTitle = ref('狮子湖越野挑战赛')
