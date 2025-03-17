@@ -6,7 +6,7 @@ const props = defineProps({
   // 上半圆文字
   topText: {
     type: String,
-    default: '纸上谈兵委员会'
+    default: '狮子湖越野挑战赛委员会'
   },
   // 五角星下方文字
   centerText: {
@@ -139,7 +139,7 @@ const saveSealAsImage = () => {
   font-size: 42px;
   fill: #FF0000;
   font-weight: bold;
-  letter-spacing: 10px;
+  letter-spacing: 4px;
 }
 
 .star {

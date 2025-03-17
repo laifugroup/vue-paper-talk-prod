@@ -7,20 +7,20 @@ import Seal from './Seal.vue'
 import MusicPlayer from './MusicPlayer.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
-
+import { useRouter } from 'vue-router'
 
 const currentDate=new Date()
 const currentYear = currentDate.getFullYear()
 const nextYear = currentYear+1
 const formattedDate = `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月${currentDate.getDate()}日`;
 
-const pdfTitle = ref('纸上谈兵委员会')
-const pdfSubTitle = ref('关于纸上谈兵挑战赛的通知')
-const pdfContent = ref(`    恭喜您在${currentYear}-${nextYear}年度'纸上谈兵'中脱颖而出，荣获佳绩！经评审委员会一致决定，特授予您“常胜将军”荣誉称号，以表彰您的突出贡献！`)
-const pdfNickName = ref('不吃香菜(努力版)')
+const pdfTitle = ref('狮子湖越野挑战赛委员会')
+const pdfSubTitle = ref('成都狮子湖越野挑战赛')
+const pdfContent = ref(`    恭喜您在${currentYear}-${nextYear}年度“狮子湖越野挑战赛”中完成挑战，特此证明。\n\n特授予您“狮子湖极限挑战者”荣誉称号！`)
+const pdfNickName = ref('川A78BBQ')
 
 const isLoading = ref(false)
-const inputTopText = ref('纸上谈兵委员会')
+const inputTopText = ref('狮子湖越野挑战赛委员会')
 const inputCenterText = ref('官方认证')
 const inputBottomCode = ref('51000020161224')
 const pdfUrl = ref('')
@@ -402,7 +402,11 @@ const handlePrint = () => {
     }
   }
 }
+const router = useRouter()
 
+const handleSetting = () => {
+  router.push('/settings')
+}
 </script>
 
 <template>
@@ -505,6 +509,12 @@ const handlePrint = () => {
         </button>
         <button class="icon-button" @click="handlePrint" title="打印PDF">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
+        <button class="icon-button" @click="handleSetting" title="设置">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
         </button>
       </div>
       <div v-if="isLoading" class="loading-overlay">
