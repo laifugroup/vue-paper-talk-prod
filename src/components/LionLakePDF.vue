@@ -111,14 +111,14 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
 
   // 添加右下角文字和日期
   const currentDate = new Date()
-  const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月`
+  const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
   doc.setTextColor(0, 0, 0) // 恢复黑色
   doc.setFontSize(24)
   // 添加文字
   doc.text(`纸上谈兵\n${formattedDate}`, pageWidth - 180, pageHeight - 150, { align: 'center', lineHeightFactor: 1.4 })
 
   // 获取印章元素并转换为图片
-  const sealElement = document.querySelector('.seal-container')
+  const sealElement = document.querySelector('.bottom-panel')
   if (sealElement) {
     const canvas = await html2canvas(sealElement, {
       backgroundColor: null,
@@ -153,8 +153,8 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
 onMounted(() => {
   const currentNumber = getCurrentNumber()==0 ? 1: getCurrentNumber()
   const currentDate=new Date()
-    const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}月`
-    const count= `纸上谈兵(${currentDate.getFullYear()})年度${NO}`
+    const NO=`${String(currentDate.getMonth() + 1).padStart(2, '0')}${String(currentDate.getDate()).padStart(2, '0')}期`
+    const count= `纸上谈兵(${currentDate.getFullYear()})${NO}第${formatNumber(currentNumber)}号`
     const pdfMessage={
     pdfTitle:pdfTitle.value,
     pdfSubTitle:pdfSubTitle.value,
@@ -207,6 +207,11 @@ const handleSetting = () => {
 
 <template>
   <div class="paper-container">
+
+    <div class="bottom-panel">
+       <Seal :topText="inputTopText" :centerText="inputCenterText" :bottomCode="inputBottomCode" />
+     </div>
+
     <div class="center-panel">
       <div class="action-buttons">
         <button class="icon-button" @click="handleDownload" title="下载PDF">
@@ -242,6 +247,7 @@ const handleSetting = () => {
   justify-content: center;
   align-items: center;
   padding: 0;
+  position: relative;
 }
 
 .center-panel {
@@ -254,6 +260,7 @@ const handleSetting = () => {
   position: relative;
   display: flex;
   flex-direction: column;
+  z-index: 2;
 }
 
 .action-buttons {
@@ -542,14 +549,14 @@ const handleSetting = () => {
 }
 
 .bottom-panel {
-  flex: 1;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 180px;
+  height:180px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f3f3f3;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .loading-overlay {
   position: absolute;
