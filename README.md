@@ -10,9 +10,6 @@ pc版本
 
 手机版
 
-
-手机版
-
 <div style="display: flex; justify-content: space-between;">
   <img src="/images/lionLake.png" width="48%">
   <img src="/images/lionLakepdf.png" width="48%">
