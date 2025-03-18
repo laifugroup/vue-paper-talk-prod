@@ -4,9 +4,11 @@
 一个基于Vue 3和Vite开发的抖音发奖状pdf系统。基于jspdf生成pdf文件，并且使用pdf.js预览pdf文件。
 * 系统运行还需要  [抓取抖音弹幕](https://gitee.com/apebyte/dy-barrage-grab)
 ## 项目效果
-
+pc版本
 ![项目截图](/images/paper.png)
 
+
+手机版
 ![手机版1](/images/lionLake.png) ![手机版2](/images/lionLakepdf.png)
 
 
