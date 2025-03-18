@@ -7,7 +7,7 @@
 
 ![项目截图](/images/paper.png)
 
-![手机版1](/images/lionLake.png) ![手机版2](/images/lionLakePDF.png)
+![手机版1](/images/lionLake.png) ![手机版2](/images/lionLakepdf.png)
 
 
 
