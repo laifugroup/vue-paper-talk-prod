@@ -9,9 +9,14 @@ pc版本
 
 
 手机版
-![手机版1](/images/lionLake.png) ![手机版2](/images/lionLakepdf.png)
 
 
+手机版
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="/images/lionLake.png" width="48%">
+  <img src="/images/lionLakepdf.png" width="48%">
+</div>
 
 ## 项目说明
 - 项目基于Vue 3和Vite开发，使用了Vue 3的Composition API和TypeScript。
