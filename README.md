@@ -2,6 +2,12 @@
 
 ## 项目介绍
 一个基于Vue 3和Vite开发的抖音发奖状pdf系统。基于jspdf生成pdf文件，并且使用pdf.js预览pdf文件。
+
+jspdf不支持 数字签名 后续更换  pdf-lib 
+[参考文档](https://www.cnblogs.com/architectforest/p/16557446.html)
+ pnpm install pdf-lib
+ pnpm install @pdf-lib/fontkit
+
 * 系统运行还需要  [抓取抖音弹幕](https://gitee.com/apebyte/dy-barrage-grab)
 ## 项目效果
 pc版本
