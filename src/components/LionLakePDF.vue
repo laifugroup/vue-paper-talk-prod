@@ -1,10 +1,9 @@
 <script setup>
 import { ref, createApp, onMounted, onUnmounted, nextTick } from 'vue'
-import { jsPDF } from 'jspdf'
-//import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Regular.ttf' 字体没有空格
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
 import Seal from './Seal.vue'
-import MusicPlayer from './MusicPlayer.vue'
 import html2canvas from 'html2canvas'
 import VuePdfEmbed from 'vue-pdf-embed'
 import { useRouter } from 'vue-router'
@@ -53,96 +52,156 @@ const generateDocumentNumber = () => {
 const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
   isLoading.value = true
   try {
-    const doc = new jsPDF({
-      unit: 'pt',
-      hotfixes: ['pt_scaling'],
-      orientation: 'p',
-      format: 'a4',
-      putOnlyUsedFonts: true,
-      compress: true
+    const pdfDoc = await PDFDocument.create()
+    pdfDoc.registerFontkit(fontkit)
+    
+    // 加载思源黑体
+    const fontBytes = await fetch(SourceHanSansCN).then(res => res.arrayBuffer())
+    const customFont = await pdfDoc.embedFont(fontBytes)
+    
+    // 创建页面
+    const page = pdfDoc.addPage([595, 842]) // A4尺寸
+    const { width, height } = page.getSize()
+    
+    // 绘制标题
+    const titleWidth = customFont.widthOfTextAtSize(pdfMessage.pdfTitle, 36)
+    page.drawText(pdfMessage.pdfTitle, {
+      x: (width - titleWidth) / 2,
+      y: height - 50,
+      font: customFont,
+      size: 36,
+      color: rgb(1, 0, 0)
     })
-  
-  // 使用本地思源黑体
-  doc.addFont(SourceHanSansCN, 'SourceHanSansCN', 'normal')
-  doc.setFont('SourceHanSansCN', 'normal')
-  doc.setLanguage('zh-CN')
-  
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  // 设置字体大小和位置
-  doc.setFontSize(36)
-  doc.setTextColor(255, 0, 0) // 设置红色
-  doc.text(pdfMessage.pdfTitle, pageWidth / 2, 50, { align: 'center' })
-  
-  doc.setFontSize(16)
-  doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.text(pdfMessage.pdfCount, pageWidth / 2, 81, { align: 'center' })
-  //2条红色横线
-  doc.setDrawColor(255, 0, 0) // 设置线条颜色为红色
-  doc.line(40, 90, pageWidth - 40, 90) // 第一条横线
-  doc.line(40, 95, pageWidth - 40, 95) // 第二条横线
-
-  doc.setFontSize(24)
-  doc.setTextColor(255, 0, 0) // 设置红色
-  const subtitleX = pageWidth  / 2
-  doc.text(pdfMessage.pdfSubTitle, subtitleX, 128, { align: 'center' })
-  
-  doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.setFontSize(16)
-  const contentLines = doc.splitTextToSize(`${pdfMessage.pdfNickName}:\n\n${pdfMessage.pdfContent}`, pageWidth-120)
-  //
-  console.log(contentLines)
-  doc.text(contentLines, 40, 170, { 
-    align: 'left', 
-    renderingMode: 'fill', 
-    charSpace: 1.2,  // 增加字符间距
-    preserveLeadingSpaces: true, 
-    lineHeightFactor: 1.2, 
-  })
-
-
-//添加底部 编码文字 NO.202303120011 最后一位为20230312001的对8取余的校验位
-  doc.setFontSize(14)
-  doc.setTextColor(0, 0, 0) // 恢复黑色
-  const numbers = pdfMessage.pdfCount.match(/\d+/g); // 提取所有数字
-  const sum = numbers.reduce((acc, num) => acc + parseInt(num), 0) % 8; // 计算总和并对 8 取余
-  const NO = `${numbers.join('')}${sum===4?9:sum}`; // 去掉逗号并拼接结果
-  doc.text(`编号：NO.${NO}`, pageWidth / 2, pageHeight-14, { align: 'center' })
-
-  // 添加右下角文字和日期
-  const currentDate = new Date()
-  const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
-  doc.setTextColor(0, 0, 0) // 恢复黑色
-  doc.setFontSize(24)
-  // 添加文字
-  doc.text(`纸上谈兵\n${formattedDate}`, pageWidth - 180, pageHeight - 150, { align: 'center', lineHeightFactor: 1.4 })
-
-  // 获取印章元素并转换为图片
-  const sealElement = document.querySelector('.bottom-panel')
-  if (sealElement) {
-    const canvas = await html2canvas(sealElement, {
-      backgroundColor: null,
-      scale: 2,
-      logging: false
+    
+    // 绘制编号
+    const countWidth = customFont.widthOfTextAtSize(pdfMessage.pdfCount, 16)
+    page.drawText(pdfMessage.pdfCount, {
+      x: (width - countWidth) / 2,
+      y: height - 81,
+      font: customFont,
+      size: 16,
+      color: rgb(0, 0, 0)
     })
-    const sealDataUrl = canvas.toDataURL('image/png')
-    doc.addImage(sealDataUrl, 'PNG', pageWidth - 280, pageHeight - 240, 200, 200)
-  }
-
-  // 设置文件名并生成PDF
-  doc.setProperties({
-    title: pdfMessage.pdfSubTitle,
-    subject: pdfMessage.pdfNickName,
-    author: pdfMessage.pdfTitle,
-    keywords: pdfMessage.pdfTitle,
-  })
-  
-  // 生成PDF并根据参数决定是否自动下载
-  const pdfBlob = doc.output('blob')
-  pdfUrl.value = URL.createObjectURL(pdfBlob)
-  if (autoDownload) {
-    doc.save(`${pdfMessage.pdfTitle}-${pdfMessage.pdfNickName}.pdf`)
-  }
+    
+    // 绘制红线
+    page.drawLine({
+      start: { x: 40, y: height - 90 },
+      end: { x: width - 40, y: height - 90 },
+      color: rgb(1, 0, 0),
+      thickness: 1
+    })
+    page.drawLine({
+      start: { x: 40, y: height - 95 },
+      end: { x: width - 40, y: height - 95 },
+      color: rgb(1, 0, 0),
+      thickness: 1
+    })
+    
+    // 绘制副标题
+    const subTitleWidth = customFont.widthOfTextAtSize(pdfMessage.pdfSubTitle, 24)
+    page.drawText(pdfMessage.pdfSubTitle, {
+      x: (width - subTitleWidth) / 2,
+      y: height - 128,
+      font: customFont,
+      size: 24,
+      color: rgb(1, 0, 0)
+    })
+    
+    // 绘制正文内容
+    const contentText = `${pdfMessage.pdfNickName}:\n\n${pdfMessage.pdfContent}`
+    const contentLines = contentText.split('\n')
+    let currentY = height - 170
+    for (const line of contentLines) {
+      page.drawText(line, {
+        x: 40,
+        y: currentY,
+        font: customFont,
+        size: 16,
+        color: rgb(0, 0, 0),
+        lineHeight: 1.2
+      })
+      currentY -= 24 // 行间距
+    }
+    
+    // 绘制底部编号
+    const numbers = pdfMessage.pdfCount.match(/\d+/g) || []; // 修复正则表达式并添加空值检查
+    const sum = numbers.length > 0 ? numbers.reduce((acc, num) => acc + parseInt(num), 0) % 8 : 0; // 添加空值检查
+    const NO = `${numbers.join('')}${sum===4?9:sum}`;
+    const bottomText = `编号：NO.${NO}`
+    const bottomTextWidth = customFont.widthOfTextAtSize(bottomText, 14)
+    page.drawText(bottomText, {
+      x: (width - bottomTextWidth) / 2,
+      y: 14,
+      font: customFont,
+      size: 14,
+      color: rgb(0, 0, 0)
+    })
+    
+    // 绘制右下角日期
+    const currentDate = new Date()
+    const formattedDate = `${currentDate.getFullYear()}年${String(currentDate.getMonth() + 1).padStart(2, '0')}月${String(currentDate.getDate()).padStart(2, '0')}日`
+    const dateText = '纸上谈兵'
+    const dateTextWidth = customFont.widthOfTextAtSize(dateText, 24)
+    const formattedDateWidth = customFont.widthOfTextAtSize(formattedDate, 24)
+    
+    // 计算文本居中位置
+    const dateX = width - 210 + (180 - dateTextWidth) / 2
+    const formattedDateX = width - 210 + (180 - formattedDateWidth) / 2
+    
+    page.drawText(dateText, {
+      x: dateX,
+      y: 180,
+      font: customFont,
+      size: 24,
+      color: rgb(0, 0, 0)
+    })
+    
+    page.drawText(formattedDate, {
+      x: formattedDateX,
+      y: 150,
+      font: customFont,
+      size: 24,
+      color: rgb(0, 0, 0)
+    })
+    
+    // 添加印章，调整y坐标使其覆盖日期
+    const sealElement = document.querySelector('.bottom-panel')
+    if (sealElement) {
+      const canvas = await html2canvas(sealElement, {
+        backgroundColor: null,
+        scale: 2,
+        logging: false
+      })
+      const sealDataUrl = canvas.toDataURL('image/png')
+      const sealImageBytes = await fetch(sealDataUrl).then(res => res.arrayBuffer())
+      const sealImage = await pdfDoc.embedPng(sealImageBytes)
+      page.drawImage(sealImage, {
+        x: width - 220,
+        y: 84,
+        width: 200,
+        height: 200
+      })
+    }
+    
+    // 设置文档属性
+    pdfDoc.setTitle(pdfMessage.pdfSubTitle)
+    pdfDoc.setSubject(pdfMessage.pdfNickName)
+    pdfDoc.setAuthor(pdfMessage.pdfTitle)
+    pdfDoc.setKeywords([pdfMessage.pdfTitle])
+    
+    // 生成PDF
+    const pdfBytes = await pdfDoc.save()
+    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' })
+    pdfUrl.value = URL.createObjectURL(pdfBlob)
+    
+    if (autoDownload) {
+      const downloadLink = document.createElement('a')
+      downloadLink.href = pdfUrl.value
+      downloadLink.download = `${pdfMessage.pdfTitle}-${pdfMessage.pdfNickName}.pdf`
+      document.body.appendChild(downloadLink)
+      downloadLink.click()
+      document.body.removeChild(downloadLink)
+    }
   } catch (error) {
     console.error('PDF生成失败:', error)
   } finally {
@@ -223,7 +282,7 @@ const handleSetting = () => {
         <button class="icon-button" @click="handleSetting" title="设置">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
       </div>
