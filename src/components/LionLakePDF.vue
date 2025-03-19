@@ -1,6 +1,6 @@
 <script setup>
 import { ref, createApp, onMounted, onUnmounted, nextTick } from 'vue'
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import { PDFDocument, rgb, PageSizes } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import SourceHanSansCN from '@/assets/fonts/SourceHanSansSC-Normal-Min.ttf'
 import Seal from './Seal.vue'
@@ -60,7 +60,7 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
     const customFont = await pdfDoc.embedFont(fontBytes)
     
     // 创建页面
-    const page = pdfDoc.addPage([595, 842]) // A4尺寸
+    const page = pdfDoc.addPage(PageSizes.A4)
     const { width, height } = page.getSize()
     
     // 绘制标题
@@ -188,11 +188,16 @@ const genPaperTalkPdf = async (autoDownload = false, pdfMessage) => {
     pdfDoc.setSubject(pdfMessage.pdfNickName)
     pdfDoc.setAuthor(pdfMessage.pdfTitle)
     pdfDoc.setKeywords([pdfMessage.pdfTitle])
-    
-    // 生成PDF
-    const pdfBytes = await pdfDoc.save()
-    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' })
-    pdfUrl.value = URL.createObjectURL(pdfBlob)
+    // 生成PDF并保存
+    const bytes = await pdfDoc.save()
+    try {
+      const pdfBlob = new Blob([bytes], { type: 'application/pdf' })
+      pdfUrl.value = URL.createObjectURL(pdfBlob)
+    } catch (error) {
+      console.error('PDF签名失败:', error)
+      // 如果签名失败，仍然显示未签名的PDF
+     
+    }
     
     if (autoDownload) {
       const downloadLink = document.createElement('a')
